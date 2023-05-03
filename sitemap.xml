@@ -543,14 +543,14 @@
   </url>
   
   <url>
-    <loc>https://blog.ncfl.tech/tags/mysql/</loc>
+    <loc>https://blog.ncfl.tech/tags/springboot/</loc>
     <lastmod>2023-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://blog.ncfl.tech/tags/springboot/</loc>
+    <loc>https://blog.ncfl.tech/tags/mysql/</loc>
     <lastmod>2023-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

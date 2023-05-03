@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      mycat（4）分片规则 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">mycat（4）分片规则</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2019-01-01 15:28:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/java/" title="java">
+                    #java
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/mycat/" title="mycat">
+                    #mycat
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="1、种类"><a href="#1、种类" class="headerlink" title="1、种类"></a><strong>1、种类</strong></h2><p>有两种，分别是连续分片和离散分片，顾名思义，连续就是数据比较集中，比如1、2、3、4等都在dn1，离散就是数据比较分散，比如1在dn1，2在dn2,3在dn3。</p>
+<table>
+<thead>
+<tr>
+<th><br/></th>
+<th>连续分片</th>
+<th>离散分片</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>优点</td>
+<td>扩容无需迁移数<br/>范围条件查询消耗资源少</td>
+<td>并发访问能力增强 <br/>范围条件查询性能提升</td>
+</tr>
+<tr>
+<td>不足</td>
+<td>存在数据热点的可能性 <br/> 并发访问能力受限于单一或少量DataNode</td>
+<td>数据扩容比较困难，涉及到数据迁移问题<br/> 数据库连接消耗比较多</td>
+</tr>
+</tbody></table>
+<h2 id="2、连续分片"><a href="#2、连续分片" class="headerlink" title="2、连续分片"></a><strong>2、连续分片</strong></h2><h3 id="自定义数字范围分片"><a href="#自定义数字范围分片" class="headerlink" title="自定义数字范围分片"></a><strong>自定义数字范围分片</strong></h3><p>根据数据范围的某个字段的值进行分片，可以参照<code>autopartition-long.txt</code>这个分片规则。</p>
+<p>首先在<code>/conf/</code>文件下创建<code>my-rang-long.txt</code>作为自己的分片规则吗，意思是指定的字段，1-99存放在第一个节点上，100-999存放在2节点上，1000-9999存在3节点上，后续CURD的时候都会根据字段去对应的节点做操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># range start-end ,data node index</span><br><span class="line"># K=1000,M=10000.</span><br><span class="line">1-99=0</span><br><span class="line">100-999=1</span><br><span class="line">1000-9999=2</span><br></pre></td></tr></table></figure>
+<p><font color="red">ATTENTION：</font>这里配置的是3个节点，所以使用该规则必须也要有大于等于3个，否则启动的时候mycat会报下面的错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">WrapperSimpleApp: Encountered an error running main: java.lang.ExceptionInInitializerError</span><br><span class="line">java.lang.ExceptionInInitializerError</span><br><span class="line">	at io.mycat.MycatStartup.main(MycatStartup.java:53)</span><br><span class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span><br><span class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)</span><br><span class="line">	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)</span><br><span class="line">	at java.lang.reflect.Method.invoke(Unknown Source)</span><br><span class="line">	at org.tanukisoftware.wrapper.WrapperSimpleApp.run(WrapperSimpleApp.java:240)</span><br><span class="line">	at java.lang.Thread.run(Unknown Source)</span><br><span class="line">Caused by: io.mycat.config.util.ConfigException: Illegal table conf : table [ DN12 ] rule function [ my-rang-long ] partition size : 3 &gt; table datanode size : 2, please make sure table datanode size = function partition size</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.checkRuleSuitTable(XMLSchemaLoader.java:563)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.loadTables(XMLSchemaLoader.java:396)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.loadSchemas(XMLSchemaLoader.java:173)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.load(XMLSchemaLoader.java:122)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.&lt;init&gt;(XMLSchemaLoader.java:83)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.&lt;init&gt;(XMLSchemaLoader.java:87)</span><br><span class="line">	at io.mycat.config.ConfigInitializer.&lt;init&gt;(ConfigInitializer.java:76)</span><br><span class="line">	at io.mycat.config.MycatConfig.&lt;init&gt;(MycatConfig.java:72)</span><br><span class="line">	at io.mycat.MycatServer.&lt;init&gt;(MycatServer.java:170)</span><br><span class="line">	at io.mycat.MycatServer.&lt;clinit&gt;(MycatServer.java:116)</span><br><span class="line">	... 7 more</span><br></pre></td></tr></table></figure>
+<p>在<code>rule.xml</code>中配置该规则：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tableRule</span> <span class="attr">name</span>=<span class="string">&quot;my-rang&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">rule</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">columns</span>&gt;</span>id<span class="tag">&lt;/<span class="name">columns</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">algorithm</span>&gt;</span>my-rang-long<span class="tag">&lt;/<span class="name">algorithm</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">rule</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tableRule</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;my-rang-long&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.AutoPartitionByLong&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;mapFile&quot;</span>&gt;</span>my-rang-long.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;defaultNode&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><font color="red">ATTENTION：</font>这里的<code>&lt;tableRule&gt;</code>和<code>&lt;function&gt;</code>标签有顺序关系，所有的<code>&lt;tableRule&gt;</code>都必须在<code>&lt;function&gt;</code>之前，否则会报下面的错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">java.lang.ExceptionInInitializerError</span><br><span class="line">	at io.mycat.MycatStartup.main(MycatStartup.java:53)</span><br><span class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span><br><span class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)</span><br><span class="line">	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)</span><br><span class="line">	at java.lang.reflect.Method.invoke(Unknown Source)</span><br><span class="line">	at org.tanukisoftware.wrapper.WrapperSimpleApp.run(WrapperSimpleApp.java:240)</span><br><span class="line">	at java.lang.Thread.run(Unknown Source)</span><br><span class="line">Caused by: io.mycat.config.util.ConfigException: org.xml.sax.SAXParseException; lineNumber: 147; columnNumber: 14; 元素类型为 &quot;mycat:rule&quot; 的内容必须匹配 &quot;(tableRule*,function*)&quot;。</span><br><span class="line">	at io.mycat.config.loader.xml.XMLRuleLoader.load(XMLRuleLoader.java:95)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLRuleLoader.&lt;init&gt;(XMLRuleLoader.java:64)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.&lt;init&gt;(XMLSchemaLoader.java:74)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLSchemaLoader.&lt;init&gt;(XMLSchemaLoader.java:87)</span><br><span class="line">	at io.mycat.config.ConfigInitializer.&lt;init&gt;(ConfigInitializer.java:76)</span><br><span class="line">	at io.mycat.config.MycatConfig.&lt;init&gt;(MycatConfig.java:72)</span><br><span class="line">	at io.mycat.MycatServer.&lt;init&gt;(MycatServer.java:170)</span><br><span class="line">	at io.mycat.MycatServer.&lt;clinit&gt;(MycatServer.java:116)</span><br><span class="line">	... 7 more</span><br><span class="line">Caused by: org.xml.sax.SAXParseException; lineNumber: 147; columnNumber: 14; 元素类型为 &quot;mycat:rule&quot; 的内容必须匹配 &quot;(tableRule*,function*)&quot;。</span><br><span class="line">	at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.createSAXParseException(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.error(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDValidator.handleEndElement(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDValidator.endElement(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanEndElement(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.parsers.DOMParser.parse(Unknown Source)</span><br><span class="line">	at com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderImpl.parse(Unknown Source)</span><br><span class="line">	at javax.xml.parsers.DocumentBuilder.parse(Unknown Source)</span><br><span class="line">	at io.mycat.config.util.ConfigUtil.getDocument(ConfigUtil.java:115)</span><br><span class="line">	at io.mycat.config.loader.xml.XMLRuleLoader.load(XMLRuleLoader.java:86)</span><br><span class="line">	... 14 more</span><br></pre></td></tr></table></figure>
+<p>最后在<code>schema.xml</code>使用该规则：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">&quot;dn12&quot;</span> <span class="attr">dataNode</span>=<span class="string">&quot;dn1,dn2,dn3&quot;</span> <span class="attr">rule</span>=<span class="string">&quot;my-rang&quot;</span>/&gt;</span> </span><br></pre></td></tr></table></figure>
+<p>重启服务，可以看出只在dn1这个节点进行操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select * from dn12 where `id`=1;</span><br><span class="line">+-----------+---------------------------------------------+</span><br><span class="line">| DATA_NODE | SQL                                         |</span><br><span class="line">+-----------+---------------------------------------------+</span><br><span class="line">| dn1       | SELECT * FROM dn12 WHERE `id` = 1 LIMIT 100 |</span><br><span class="line">+-----------+---------------------------------------------+</span><br><span class="line">1 row in set (0.02 sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="按日期（天）分片"><a href="#按日期（天）分片" class="headerlink" title="按日期（天）分片"></a><strong>按日期（天）分片</strong></h3><p>从开始日期算起，按照天数来分片<br>例如，从2014-01-01，每10天一个分片<br>注意事项：需要提前将分片规划好，建好，否则有可能日期超出实际配置分片数</p>
+<p>配置方法同上，此时我在数据库中date类型设置的类型为date，故没有时分秒，但是正常情况下应该是timestamp吧。这个就不知道了，后续在做研究。<br>这种配置情况下，2018-12-31对应的就是第1分片，往后的每一天都是下一个分片，2019-01-01为第2个分片，所以使用这种分片方式需要注意有足够的分片。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tableRule</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-date&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">rule</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">columns</span>&gt;</span>date<span class="tag">&lt;/<span class="name">columns</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">algorithm</span>&gt;</span>sharding-by-date<span class="tag">&lt;/<span class="name">algorithm</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">rule</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tableRule</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-date&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByDate&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;dateFormat&quot;</span>&gt;</span>yyyy-MM-dd<span class="tag">&lt;/<span class="name">property</span>&gt;</span>		<span class="comment">&lt;!--日期格式--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sBeginDate&quot;</span>&gt;</span>2018-12-31<span class="tag">&lt;/<span class="name">property</span>&gt;</span>		<span class="comment">&lt;!--开始日期--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sPartionDay&quot;</span>&gt;</span>1<span class="tag">&lt;/<span class="name">property</span>&gt;</span> 				<span class="comment">&lt;!--每分片天数--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">&quot;test_date&quot;</span> <span class="attr">dataNode</span>=<span class="string">&quot;dn1,dn2,dn3&quot;</span> <span class="attr">rule</span>=<span class="string">&quot;sharding-by-date&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain SELECT * FROM test_date where date = &#x27;2019-01-01&#x27;;</span><br><span class="line">+-----------+-------------------------------------------------------------+</span><br><span class="line">| DATA_NODE | SQL                                                         |</span><br><span class="line">+-----------+-------------------------------------------------------------+</span><br><span class="line">| dn2       | SELECT * FROM test_date WHERE date = &#x27;2019-01-01&#x27; LIMIT 100 |</span><br><span class="line">+-----------+-------------------------------------------------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>如果分派数量不足：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM test_date where date = &#x27;2019-01-10&#x27;;</span><br><span class="line">ERROR 1064 (HY000): Can&#x27;t find a valid data node for specified node index :TEST_DATE -&gt; DATE -&gt; 2019-01-10 -&gt; Index : 10</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="按单月小时分片"><a href="#按单月小时分片" class="headerlink" title="按单月小时分片"></a><strong>按单月小时分片</strong></h3><p>最小粒度是小时，可以一天最多24个分片，最少1个分片，一个月完后下月从头开始循环。<br>注意事项：每个月月尾，需要手工清理数据。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-hour&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.LatestMonthPartion&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;splitOneDay&quot;</span>&gt;</span>24<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自然月分片"><a href="#自然月分片" class="headerlink" title="自然月分片"></a><strong>自然月分片</strong></h3><p>每个自然月一个分片<br>注意事项：需要提前将分片数规划好，建好，否则有可能日期超出实际配置分片数</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-month&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByMonth&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;dateFormat&quot;</span>&gt;</span>yyyy-MM-dd<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sBeginDate&quot;</span>&gt;</span>2014-01-01<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3、离散分片"><a href="#3、离散分片" class="headerlink" title="3、离散分片"></a><strong>3、离散分片</strong></h2><h3 id="枚举分片"><a href="#枚举分片" class="headerlink" title="枚举分片"></a><strong>枚举分片</strong></h3><p>通过在配置文件中配置可能的枚举id，自己配置分片，本规则适用于特定的场景，比如有些业务需要按照省份或区县来做保存，而全国省份区县固定的<br>配置文件：当字段值为10000时，操作在dn1上进行，当字段值为10010时，在dn2上操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">10000=0</span><br><span class="line">10010=1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tableRule</span> <span class="attr">name</span>=<span class="string">&quot;my-hash-int&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">rule</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">columns</span>&gt;</span>id<span class="tag">&lt;/<span class="name">columns</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">algorithm</span>&gt;</span>hash-int<span class="tag">&lt;/<span class="name">algorithm</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">rule</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tableRule</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;hash-int&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByFileMap&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;mapFile&quot;</span>&gt;</span>partition-hash-int.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;type&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;defaultNode&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="程序指定分区的分片"><a href="#程序指定分区的分片" class="headerlink" title="程序指定分区的分片"></a><strong>程序指定分区的分片</strong></h3><p>此规则是在运行阶段有应用自主决定路由到那个分片。此方法为直接根据字符子串（必须是数字）计算分区号（由应用传递参数，显式指定分区号）。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-substring&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionDirectBySubString&quot;</span>&gt;</span>         </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;startIndex&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span>        <span class="comment">&lt;!-- zero-based --&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;size&quot;</span>&gt;</span>2<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;partitionCount&quot;</span>&gt;</span>8<span class="tag">&lt;/<span class="name">property</span>&gt;</span>    <span class="comment">&lt;!-- 分区数 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;defaultPartition&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>例如id&#x3D;05-100000002在此配置中代表根据id中从startIndex&#x3D;0，开始，截取siz&#x3D;2位数字即05，05就是获取的分区，如果没传默认分配到defaultPartition</p>
+<h3 id="十进制求模分片"><a href="#十进制求模分片" class="headerlink" title="十进制求模分片"></a><strong>十进制求模分片</strong></h3><p>规则为对分片字段十进制取模运算。数据分布最均匀</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;mod-long&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByMod&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;count&quot;</span>&gt;</span>3<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串hash分片"><a href="#字符串hash分片" class="headerlink" title="字符串hash分片"></a><strong>字符串hash分片</strong></h3><p>此规则是截取字符串中的int数值hash分片</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-stringhash&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByString&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">length</span>&gt;</span>512<span class="tag">&lt;/<span class="name">property</span>&gt;</span><span class="comment">&lt;!-- zero-based --&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;count&quot;</span>&gt;</span>2<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;hashSlice&quot;</span>&gt;</span>0:2<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>length代表字符串hash求模基数，count分区数，其中length*count&#x3D;1024<br>hashSlice hash预算位，即根据子字符串中int值 hash运算，可以理解为substring（start，end），start为0则只表示0<br>例1：值“45abc”，hash预算位0:2 ，取其中45进行计算<br>例2：值“aaaabbb2345”，hash预算位-4:0 ，取其中2345进行计算</p>
+<h3 id="一致性Hash分片"><a href="#一致性Hash分片" class="headerlink" title="一致性Hash分片"></a><strong>一致性Hash分片</strong></h3><p>此规则优点在于扩容时迁移数据量比较少，前提分片节点比较多，虚拟节点分配多些。<br>虚拟节点少的缺点是会造成数据分布不够均匀<br>如果实际分片数量比较少，迁移量会比较多</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;murmur&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByMurmurHash&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;seed&quot;</span>&gt;</span>0<span class="tag">&lt;/<span class="name">property</span>&gt;</span><span class="comment">&lt;!-- 默认是0--&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;count&quot;</span>&gt;</span>2<span class="tag">&lt;/<span class="name">property</span>&gt;</span><span class="comment">&lt;!-- 要分片的数据库节点数量，必须指定，否则没法分片--&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;virtualBucketTimes&quot;</span>&gt;</span>160<span class="tag">&lt;/<span class="name">property</span>&gt;</span><span class="comment">&lt;!-- 一个实际的数据库节点被映射为这么多虚拟节点，默认是160倍，也就是虚拟节点数是物理节点数的160倍--&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4、综合类分片规则"><a href="#4、综合类分片规则" class="headerlink" title="4、综合类分片规则"></a><strong>4、综合类分片规则</strong></h2><h3 id="范围求模分片"><a href="#范围求模分片" class="headerlink" title="范围求模分片"></a><strong>范围求模分片</strong></h3><p>先进行范围分片计算出分片组，组内再求模<br>优点可以避免扩容时的数据迁移，又可以一定程度上避免范围分片的热点问题<br>分片组内使用求模可以保证组内数据比较均匀，分片组之间是范围分片可以兼顾范围查询。<br>最好事先规划好分片的数量，数据扩容时按分片组扩容，则原有分片组的数据不需要迁移。由于分片组内数据比较均匀，所以分片组内可以避免热点数据问题。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;rang-mod&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByRangeMod&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;mapFile&quot;</span>&gt;</span>partition-range-mod.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;defaultNode&quot;</span>&gt;</span>21<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>partition-range-mod.txt</code>以下配置一个范围代表一个分片组，&#x3D;号后面的数字代表该分片组所拥有的分片的数量。0-200M&#x3D;5 代表有5个分片节点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0-200=5</span><br><span class="line">201-400=1</span><br><span class="line">401-600=4</span><br><span class="line">601-800=4</span><br><span class="line">801-1000=6</span><br></pre></td></tr></table></figure>
+<h3 id="日期范围hash分片"><a href="#日期范围hash分片" class="headerlink" title="日期范围hash分片"></a><strong>日期范围hash分片</strong></h3><p>思想与范围求模一致，当由于日期在取模会有数据集中问题，所以改成hash方法。要求日期格式尽量精确些，不然达不到局部均匀的目的<br>sPartionDay代表多少天分一个分片<br>groupPartionSize代表分片组的大小</p>
+<p>如下配置，则分别对应的是1-6分片，7-12分片等等</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;rang-date-hash&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByRangeDateHash&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sBeginDate&quot;</span>&gt;</span>2018-12-31<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;sPartionDay&quot;</span>&gt;</span>3<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;dateFormat&quot;</span>&gt;</span>yyyy-MM-dd<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;groupPartionSize&quot;</span>&gt;</span>6<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="取模范围约束分片"><a href="#取模范围约束分片" class="headerlink" title="取模范围约束分片"></a><strong>取模范围约束分片</strong></h3><p>取模运算与范围约束的结合，主要为了后续数据迁移做准备，即可以自主决定取模后数据的节点分布。<br>patternValue 即求模基数，defaoultNode 默认节点</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-pattern&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByPattern&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;patternValue&quot;</span>&gt;</span>256<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;defaultNode&quot;</span>&gt;</span>2<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;mapFile&quot;</span>&gt;</span>partition-pattern.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>partition-pattern.txt</code>1-32 即代表id%256后分布的范围，如果hash结果在0-32则在dn1。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">0-32=0</span><br><span class="line">33-64=1</span><br><span class="line">65-96=2</span><br><span class="line">97-128=3</span><br><span class="line">129-160=4</span><br><span class="line">161-192=5</span><br><span class="line">193-224=6</span><br><span class="line">225-256=7</span><br></pre></td></tr></table></figure>
+
+<h3 id="ASCII码求模范围约束分片"><a href="#ASCII码求模范围约束分片" class="headerlink" title="ASCII码求模范围约束分片"></a><strong>ASCII码求模范围约束分片</strong></h3><p>此种规则类似于取模范围约束，此规则支持数据符号字母取模,patternValue 即求模基数，<br>prefixLength ASCII 截取的位数,此种方式类似求模范围只不过采取的是将列,获取前prefixLength位列所有ASCII码的和<br>进行求模sum%patternValue。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;sharding-by-pattern&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByPrefixPattern&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;patternValue&quot;</span>&gt;</span>256<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;prefixLength&quot;</span>&gt;</span>5<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;mapFile&quot;</span>&gt;</span>partition-pattern.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>例如：prefixLength&#x3D;5，值为ascii123456，则取(ascii的值和)%256</p>
+<h3 id="固定分片hash（二进制）"><a href="#固定分片hash（二进制）" class="headerlink" title="固定分片hash（二进制）"></a><strong>固定分片hash（二进制）</strong></h3><p>本条规则类似于十进制的求模运算，区别在于是二进制的操作,是取id的二进制低10位，<br>即id二进制&amp;1111111111。实际效果与求模范围类似。此算法根据二进制则可能会分到连续的分片</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">&quot;func1&quot;</span> <span class="attr">class</span>=<span class="string">&quot;io.mycat.route.function.PartitionByLong&quot;</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;partitionCount&quot;</span>&gt;</span>2,1<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;partitionLength&quot;</span>&gt;</span>256,512<span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>partitionCount 分片个数列表，partitionLength 分片范围列表分区长度:默认为最大2^n&#x3D;1024 ,即最大支持1024分区<br>约束 :count,length两个数组的长度必须是一致的。1024 &#x3D; sum((count[i]*length[i])). count和length两个向量的点积恒等于1024<br>本例的分区策略：希望将数据水平分成3份，前两份各占25%，第三份占50%。（故本例非均匀分区）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> |&lt;————————————————————1024————————————————————&gt;|</span><br><span class="line"> |&lt;———256———&gt;|&lt;———256————&gt;|&lt;————————512————————&gt;|</span><br><span class="line"> | partition0| partition1 |   partition2        |</span><br><span class="line"> |   共2份,故count[0]=2   | 共1份，故count[1]=1  |	</span><br><span class="line">int[] count = new int[] &#123; 2, 1 &#125;;	</span><br><span class="line">int[] length = new int[] &#123; 256, 512 &#125;;</span><br></pre></td></tr></table></figure>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/9930/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2019-01-01 15:28:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/java/" title="java">
+                        #java
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/mycat/" title="mycat">
+                        #mycat
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/43338/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E7%A7%8D%E7%B1%BB"><span class="toc-text">1、种类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E8%BF%9E%E7%BB%AD%E5%88%86%E7%89%87"><span class="toc-text">2、连续分片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E5%AD%97%E8%8C%83%E5%9B%B4%E5%88%86%E7%89%87"><span class="toc-text">自定义数字范围分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E6%97%A5%E6%9C%9F%EF%BC%88%E5%A4%A9%EF%BC%89%E5%88%86%E7%89%87"><span class="toc-text">按日期（天）分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E5%8D%95%E6%9C%88%E5%B0%8F%E6%97%B6%E5%88%86%E7%89%87"><span class="toc-text">按单月小时分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E7%84%B6%E6%9C%88%E5%88%86%E7%89%87"><span class="toc-text">自然月分片</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E7%A6%BB%E6%95%A3%E5%88%86%E7%89%87"><span class="toc-text">3、离散分片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%9A%E4%B8%BE%E5%88%86%E7%89%87"><span class="toc-text">枚举分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A8%8B%E5%BA%8F%E6%8C%87%E5%AE%9A%E5%88%86%E5%8C%BA%E7%9A%84%E5%88%86%E7%89%87"><span class="toc-text">程序指定分区的分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%E8%BF%9B%E5%88%B6%E6%B1%82%E6%A8%A1%E5%88%86%E7%89%87"><span class="toc-text">十进制求模分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2hash%E5%88%86%E7%89%87"><span class="toc-text">字符串hash分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7Hash%E5%88%86%E7%89%87"><span class="toc-text">一致性Hash分片</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81%E7%BB%BC%E5%90%88%E7%B1%BB%E5%88%86%E7%89%87%E8%A7%84%E5%88%99"><span class="toc-text">4、综合类分片规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8C%83%E5%9B%B4%E6%B1%82%E6%A8%A1%E5%88%86%E7%89%87"><span class="toc-text">范围求模分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A5%E6%9C%9F%E8%8C%83%E5%9B%B4hash%E5%88%86%E7%89%87"><span class="toc-text">日期范围hash分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%96%E6%A8%A1%E8%8C%83%E5%9B%B4%E7%BA%A6%E6%9D%9F%E5%88%86%E7%89%87"><span class="toc-text">取模范围约束分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ASCII%E7%A0%81%E6%B1%82%E6%A8%A1%E8%8C%83%E5%9B%B4%E7%BA%A6%E6%9D%9F%E5%88%86%E7%89%87"><span class="toc-text">ASCII码求模范围约束分片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BA%E5%AE%9A%E5%88%86%E7%89%87hash%EF%BC%88%E4%BA%8C%E8%BF%9B%E5%88%B6%EF%BC%89"><span class="toc-text">固定分片hash（二进制）</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

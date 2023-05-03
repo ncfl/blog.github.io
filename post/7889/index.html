@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      log4j配置文件详解 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">log4j配置文件详解</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2019-06-11 22:49:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/java/" title="java">
+                    #java
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/log4j/" title="log4j">
+                    #log4j
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h1 id="log4j-xml"><a href="#log4j-xml" class="headerlink" title="log4j.xml"></a><strong>log4j.xml</strong></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE log4j:configuration PUBLIC &quot;-//log4j/log4j Configuration//EN&quot; &quot;log4j.dtd&quot;&gt;</span><br><span class="line"> </span><br><span class="line">&lt;log4j:configuration xmlns:log4j=&quot;http://jakarta.apache.org/log4j/&quot;&gt;</span><br><span class="line"> </span><br><span class="line">    &lt;!-- 日志输出到控制台 --&gt;</span><br><span class="line">    &lt;appender name=&quot;console&quot; class=&quot;org.apache.log4j.ConsoleAppender&quot;&gt;</span><br><span class="line">        &lt;!-- 日志输出格式 --&gt;</span><br><span class="line">        &lt;layout class=&quot;org.apache.log4j.PatternLayout&quot;&gt;</span><br><span class="line">            </span><br><span class="line">        &lt;/layout&gt;</span><br><span class="line"> </span><br><span class="line">        &lt;!--过滤器设置输出的级别--&gt;</span><br><span class="line">        &lt;filter class=&quot;org.apache.log4j.varia.LevelRangeFilter&quot;&gt;</span><br><span class="line">            &lt;!-- 设置日志输出的最小级别 --&gt;</span><br><span class="line">            </span><br><span class="line">            &lt;!-- 设置日志输出的最大级别 --&gt;</span><br><span class="line">            </span><br><span class="line">        &lt;/filter&gt;</span><br><span class="line">    &lt;/appender&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &lt;!-- 输出日志到文件 --&gt;</span><br><span class="line">    &lt;appender name=&quot;fileAppender&quot; class=&quot;org.apache.log4j.FileAppender&quot;&gt;</span><br><span class="line">        &lt;!-- 输出文件全路径名--&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!--是否在已存在的文件追加写：默认时true，若为false则每次启动都会删除并重新新建文件--&gt;</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        &lt;!--是否启用缓存，默认false--&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!--缓存大小，依赖上一个参数(bufferedIO), 默认缓存大小8K --&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志输出格式 --&gt;</span><br><span class="line">        &lt;layout class=&quot;org.apache.log4j.PatternLayout&quot;&gt;</span><br><span class="line">            </span><br><span class="line">        &lt;/layout&gt;</span><br><span class="line">    &lt;/appender&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &lt;!-- 输出日志到文件，当文件大小达到一定阈值时，自动备份 --&gt;</span><br><span class="line">    &lt;!-- FileAppender子类 --&gt;</span><br><span class="line">    &lt;appender name=&quot;rollingAppender&quot; class=&quot;org.apache.log4j.RollingFileAppender&quot;&gt;</span><br><span class="line">        &lt;!-- 日志文件全路径名 --&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!--是否在已存在的文件追加写：默认时true，若为false则每次启动都会删除并重新新建文件--&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 保存备份日志的最大个数，默认值是：1 --&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 设置当日志文件达到此阈值的时候自动回滚，单位可以是KB，MB，GB，默认单位是KB，默认值是：10MB --&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 设置日志输出的样式 --&gt;`</span><br><span class="line">        &lt;layout class=&quot;org.apache.log4j.PatternLayout&quot;&gt;</span><br><span class="line">            &lt;!-- 日志输出格式 --&gt;</span><br><span class="line">            </span><br><span class="line">        &lt;/layout&gt;</span><br><span class="line">    &lt;/appender&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &lt;!-- 日志输出到文件，可以配置多久产生一个新的日志信息文件 --&gt;</span><br><span class="line">    &lt;appender name=&quot;dailyRollingAppender&quot; class=&quot;org.apache.log4j.DailyRollingFileAppender&quot;&gt;</span><br><span class="line">        &lt;!-- 文件文件全路径名 --&gt;</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        &lt;!-- 设置日志备份频率，默认：为每天一个日志文件 --&gt;</span><br><span class="line">        </span><br><span class="line"> </span><br><span class="line">        &lt;!--每分钟一个备份--&gt;</span><br><span class="line">        &lt;!----&gt;</span><br><span class="line">        &lt;layout class=&quot;org.apache.log4j.PatternLayout&quot;&gt;</span><br><span class="line">            </span><br><span class="line">        &lt;/layout&gt;</span><br><span class="line">    &lt;/appender&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &lt;!-- 1. 指定logger的设置，additivity是否遵循缺省的继承机制 2. 当additivity=&quot;false&quot;时，root中的配置就失灵了，不遵循缺省的继承机制 3. 代码中使用Logger.getLogger(&quot;logTest&quot;)获得此输出器，且不会使用根输出器 --&gt;</span><br><span class="line">    &lt;logger name=&quot;logTest&quot; additivity=&quot;false&quot;&gt;</span><br><span class="line">        &lt;level value =&quot;INFO&quot;/&gt;</span><br><span class="line">        &lt;appender-ref ref=&quot;dailyRollingAppender&quot;/&gt;</span><br><span class="line">    &lt;/logger&gt;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    &lt;!-- 根logger的设置，若代码中未找到指定的logger，则会根据继承机制，使用根logger--&gt;</span><br><span class="line">    &lt;root&gt;</span><br><span class="line">        &lt;appender-ref ref=&quot;console&quot;/&gt;</span><br><span class="line">        &lt;appender-ref ref=&quot;fileAppender&quot;/&gt;</span><br><span class="line">        &lt;appender-ref ref=&quot;rollingAppender&quot;/&gt;</span><br><span class="line">        &lt;appender-ref ref=&quot;dailyRollingAppender&quot;/&gt;</span><br><span class="line">    &lt;/root&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/log4j:configuration&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="log4j2-xml"><a href="#log4j2-xml" class="headerlink" title="log4j2.xml"></a><strong>log4j2.xml</strong></h1><p>建议粗粗了解之后，后面的详情都参考官网<br><a target="_blank" rel="noopener external nofollow noreferrer" href="http://logging.apache.org/log4j/2.x/manual/appenders.html">http://logging.apache.org/log4j/2.x/manual/appenders.html</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!--日志级别以及优先级排序: OFF&gt; FATAL &gt; ERROR &gt; WARN &gt; INFO &gt; DEBUG &gt; TRACE &gt; ALL --&gt;</span><br><span class="line">&lt;!-- Configuration 属性等信息配置位置 status 用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部的详细输出 monitorInterval 自动检测修改配置 文件和重新配置本身,设置间隔秒数 --&gt;</span><br><span class="line">&lt;configuration status=&quot;WARN&quot;&gt;</span><br><span class="line">    &lt;Properties&gt;</span><br><span class="line">    </span><br><span class="line">        &lt;!-- 日志默认存放的位置,这里设置为项目根路径下,也可指定绝对路径 --&gt;</span><br><span class="line">        &lt;!-- $&#123;web:rootDir&#125;是web项目根路径,java项目没有这个变量,需要删掉,否则会报异常 --&gt;</span><br><span class="line">        &lt;!-- &lt;property name=&quot;basePath&quot;&gt;d:/qfxSpringMVCMybaitsDemoLogs&lt;/property&gt; --&gt;</span><br><span class="line">        &lt;property name=&quot;basePath&quot;&gt;$&#123;web:rootDir&#125;/log4j2Logs&lt;/property&gt;</span><br><span class="line"></span><br><span class="line">        &lt;!-- 可以参考https://blog.csdn.net/maihilton/article/details/80814739，官网没有找到相关配置 控制台默认输出格式,&quot;%-5level&quot;:日志级别,&quot;%l&quot;:输出完整的错误位置,是小写的L %c&#123;参数&#125; 或 %logger&#123;参数&#125; 输出日志名称 %C&#123;参数&#125; 或 %class&#123;参数&#125; 输出类型 %d&#123;参数&#125; 输出时间 %F 或者 %file 显示调用logger的源文件名 highlight&#123;pattern&#125;&#123;style&#125; 高亮显示 %l 输出日志事件的发生位置，包括类目名、发生的线程，以及在代码中的行数，会影响性能 %L 输出错误行号 %m 或 %msg 或 %message 输出错误信息 %M 或 %method 显示调用logger的方法名 %n 输出换行符 %p 或者 %level 显示该条日志的优先级 INFO DEBUG %t 或 %thread 输出产生该日志事件的线程名 %r 显示从程序启动时到记录该条日志时已经经过的毫秒数 %20 右对齐，不足20个字符则在信息前面用空格补足，超过20个字符则保留原信息 %-20 左对齐，不足20个字符则在信息后面用空格补足，超过20个字符则保留原信息 %.30 如果信息超过30个字符，则只保留最后30个字符 %20.30 右对齐，不足20个字符则在信息前面用空格补足，超过30个字符则只保留最后30个字符 %-20.30 左对齐，不足20个字符则在信息后面用空格补足，超过30个字符则只保留最后30个字符 --&gt;</span><br><span class="line">        &lt;property name=&quot;console_log_pattern&quot;&gt;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%-5level] %l - %m%n&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志默认切割的最小单位 --&gt;</span><br><span class="line">        &lt;property name=&quot;every_file_size&quot;&gt;20MB&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志默认输出级别 --&gt;</span><br><span class="line">        &lt;property name=&quot;output_log_level&quot;&gt;DEBUG&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志默认存放路径(所有级别日志) --&gt;</span><br><span class="line">        &lt;property name=&quot;rolling_fileName&quot;&gt;$&#123;basePath&#125;/all.log&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志默认压缩路径,将超过指定文件大小的日志,自动存入按&quot;年月&quot;建立的文件夹下面并进行压缩,作为存档 --&gt;</span><br><span class="line">        &lt;property name=&quot;rolling_filePattern&quot;&gt;$&#123;basePath&#125;/%d&#123;yyyy-MM&#125;/all-%d&#123;yyyy-MM-dd&#125;-%i.log.gz&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 日志默认同类型日志,同一文件夹下可以存放的数量,不设置此属性则默认为7个 --&gt;</span><br><span class="line">        &lt;property name=&quot;rolling_max&quot;&gt;50&lt;/property&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 控制台显示的日志最低级别 --&gt;</span><br><span class="line">        &lt;property name=&quot;console_print_level&quot;&gt;DEBUG&lt;/property&gt;</span><br><span class="line"></span><br><span class="line">    &lt;/Properties&gt;</span><br><span class="line"></span><br><span class="line">    &lt;!--定义appender --&gt;</span><br><span class="line">    &lt;appenders&gt;</span><br><span class="line">        &lt;!-- 用来定义输出到控制台的配置 --&gt;</span><br><span class="line">        &lt;Console name=&quot;Console&quot;&gt;</span><br><span class="line">            &lt;!-- 设置控制台只输出level及以上级别的信息(onMatch),其他的直接拒绝(onMismatch) --&gt;</span><br><span class="line">            &lt;ThresholdFilter level=&quot;$&#123;console_print_level&#125;&quot;/&gt;</span><br><span class="line">            &lt;!-- 设置输出格式,不设置默认为:%m%n --&gt;</span><br><span class="line">            &lt;PatternLayout pattern=&quot;$&#123;console_log_pattern&#125;&quot;/&gt;</span><br><span class="line">        &lt;/Console&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 打印root中指定的level级别以上的日志到文件 --&gt;</span><br><span class="line">        &lt;RollingFile name=&quot;RollingFile&quot; fileName=&quot;$&#123;rolling_fileName&#125;&quot; filePattern=&quot;$&#123;rolling_filePattern&#125;&quot;&gt;</span><br><span class="line">            &lt;PatternLayout pattern=&quot;$&#123;log_pattern&#125;&quot;/&gt;</span><br><span class="line">            &lt;SizeBasedTriggeringPolicy size=&quot;$&#123;every_file_size&#125;&quot;/&gt;</span><br><span class="line">            &lt;!-- 设置同类型日志,同一文件夹下可以存放的数量,如果不设置此属性则默认存放7个文件 --&gt;</span><br><span class="line">            &lt;DefaultRolloverStrategy max=&quot;$&#123;rolling_max&#125;&quot;/&gt;</span><br><span class="line">            &lt;!-- 匹配INFO以及以上级别 --&gt;</span><br><span class="line">            &lt;Filters&gt;</span><br><span class="line">                &lt;ThresholdFilter level=&quot;INFO&quot;/&gt;</span><br><span class="line">                &lt;ThresholdFilter level=&quot;INFO&quot;/&gt;</span><br><span class="line">            &lt;/Filters&gt;</span><br><span class="line">        &lt;/RollingFile&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 指定时间生成日志 --&gt;</span><br><span class="line">        &lt;Appenders&gt;</span><br><span class="line">            &lt;RollingRandomAccessFile name=&quot;logdaily&quot; fileName=&quot;$&#123;LOG_HOME&#125;/app.log&quot; filePattern=&quot;$&#123;LOG_HOME&#125;/app-%d&#123;yyyy-MM-dd&#125;.log&quot;&gt;  </span><br><span class="line">            &lt;PatternLayout pattern=&quot;%d&#123;HH:mm:ss.SSS&#125; [%t] %-5level %logger&#123;36&#125; - %msg%n&quot;/&gt;  </span><br><span class="line">            &lt;Policies&gt;  </span><br><span class="line">                &lt;!-- &lt;CronTriggeringPolicy schedule=&quot;0 0 * * * ?&quot;/&gt;  --&gt;</span><br><span class="line">                &lt;TimeBasedTriggeringPolicy interval=&quot;1&quot; modulate=&quot;true&quot;/&gt;  </span><br><span class="line">            &lt;/Policies&gt; </span><br><span class="line">            &lt;DefaultRolloverStrategy max=&quot;20&quot;/&gt; </span><br><span class="line">            &lt;/RollingRandomAccessFile&gt;  </span><br><span class="line">        &lt;/Appenders&gt;</span><br><span class="line">        </span><br><span class="line">        &lt;!-- 指定大小生成日志 --&gt;</span><br><span class="line">        &lt;Appenders&gt;  </span><br><span class="line">            &lt;RollingRandomAccessFile name=&quot;logsize&quot; fileName=&quot;$&#123;LOG_HOME&#125;/app.log&quot; filePattern=&quot;$&#123;LOG_HOME&#125;/error-%i.log&quot;&gt;  </span><br><span class="line">            &lt;PatternLayout pattern=&quot;%d&#123;HH:mm:ss.SSS&#125; [%t] %-5level %logger&#123;36&#125; - %msg%n&quot;/&gt;  </span><br><span class="line">            &lt;Policies&gt;  </span><br><span class="line">                &lt;SizeBasedTriggeringPolicy size=&quot;10 MB&quot;/&gt;  </span><br><span class="line">            &lt;/Policies&gt; </span><br><span class="line">            &lt;DefaultRolloverStrategy max=&quot;20&quot;/&gt;  </span><br><span class="line">            &lt;/RollingRandomAccessFile&gt;  </span><br><span class="line">        &lt;/Appenders&gt; </span><br><span class="line">        </span><br><span class="line">        &lt;!-- 直接输出文件 --&gt;</span><br><span class="line">        &lt;File name=&quot;MyFile&quot; fileName=&quot;logs/app.log&quot;&gt;</span><br><span class="line">          &lt;PatternLayout&gt;</span><br><span class="line">            &lt;Pattern&gt;$&#123;log_pattern&#125;&lt;/Pattern&gt;</span><br><span class="line">          &lt;/PatternLayout&gt;</span><br><span class="line">        &lt;/File&gt;</span><br><span class="line">        </span><br><span class="line">    &lt;/appenders&gt;</span><br><span class="line"></span><br><span class="line">    &lt;!--然后定义logger,只有定义了logger并引入的appender,appender才会生效 --&gt;</span><br><span class="line">    &lt;loggers&gt;</span><br><span class="line">        &lt;!-- 指定对应类的日志打印信息 --&gt;</span><br><span class="line">        &lt;logger name=&quot;java.sql&quot; level=&quot;debug&quot; additivity=&quot;false&quot;&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;Console&quot;/&gt;</span><br><span class="line">        &lt;/logger&gt;</span><br><span class="line">        &lt;!--建立一个默认的root的logger --&gt;</span><br><span class="line">        &lt;root level=&quot;$&#123;output_log_level&#125;&quot;&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;RollingFile&quot;/&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;Console&quot;/&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;MyFile&quot;/&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;logdaily&quot;/&gt;</span><br><span class="line">            &lt;appender-ref ref=&quot;logsize&quot;/&gt;</span><br><span class="line">        &lt;/root&gt;</span><br><span class="line">    &lt;/loggers&gt;</span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure>
+
+
+<p>对log4j2性能测试如下：<br>测试代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">private static Logger logger = LoggerFactory.getLogger(XXX.class);</span><br><span class="line"></span><br><span class="line">public static void main(String args[]) throws Exception &#123;</span><br><span class="line">    test(1, 100, 100);</span><br><span class="line">    // -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector</span><br><span class="line">    int[] threadPool = &#123;1, 10, 20, 50&#125;;</span><br><span class="line">    int[] thread = &#123;1, 10, 100&#125;;</span><br><span class="line">    int[] run = &#123;100, 1000, 10000, 20000&#125;;</span><br><span class="line">    for (int tp : threadPool) &#123;</span><br><span class="line">        for (int t : thread) &#123;</span><br><span class="line">            for (int r : run) &#123;</span><br><span class="line">                long l = System.currentTimeMillis();</span><br><span class="line">                test(tp, t, r);</span><br><span class="line">                long cost = System.currentTimeMillis() - l;</span><br><span class="line">                System.out.println(&quot;线程池大小&quot; + tp + &quot;\t启用线程&quot; + t + &quot;\t执行次数&quot; + (t * r) + &quot;\t耗时&quot; + cost);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void test(int threadPool, int threadNum, int runNum) throws Exception &#123;</span><br><span class="line">    ExecutorService service = Executors.newFixedThreadPool(threadPool);</span><br><span class="line">    CountDownLatch count = new CountDownLatch(threadNum * runNum);</span><br><span class="line">    int i = -1;</span><br><span class="line">    while (++i &lt; threadNum) &#123;</span><br><span class="line">        service.execute(() -&gt; &#123;</span><br><span class="line">            int j = -1;</span><br><span class="line">            while (++j &lt; runNum) &#123;</span><br><span class="line">                count.countDown();</span><br><span class="line">                logger.info(&quot;hello, &#123;&#125;&quot;, 1);</span><br><span class="line">                logger.debug(&quot;hello, &#123;&#125;&quot;, 1);</span><br><span class="line">                logger.warn(&quot;hello, &#123;&#125;&quot;, 1);</span><br><span class="line">                logger.error(&quot;hello, &#123;&#125;&quot;, 1);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    count.await();</span><br><span class="line">    service.shutdown();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="TIPS"><a href="#TIPS" class="headerlink" title="TIPS"></a><strong>TIPS</strong></h2><ul>
+<li>使用<Async>标签  异步队列是BockingQueue，队列默认大小是128</li>
+<li>使用<AsyncLogger>标签   异步队列是Disruptor队列默认大小是4096</li>
+</ul>
+<p>在一定误差的允许下，可以看出，全异步 &gt; 混合异步 &gt; 同步</p>
+<table>
+<thead>
+<tr>
+<th>线程池大小</th>
+<th>线程</th>
+<th>次数</th>
+<th>VM option</th>
+<th>同步</th>
+<th>appender异步</th>
+<th>logger异步</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1</td>
+<td>100</td>
+<td>48</td>
+<td>107</td>
+<td>3</td>
+<td>18</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>17</td>
+<td>55</td>
+<td>31</td>
+<td>66</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>10000</td>
+<td>34</td>
+<td>296</td>
+<td>252</td>
+<td>683</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>20000</td>
+<td>69</td>
+<td>340</td>
+<td>420</td>
+<td>1271</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>1000</td>
+<td>3</td>
+<td>19</td>
+<td>20</td>
+<td>64</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>10000</td>
+<td>17</td>
+<td>172</td>
+<td>200</td>
+<td>635</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>100000</td>
+<td>1161</td>
+<td>1696</td>
+<td>2016</td>
+<td>6381</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>200000</td>
+<td>3136</td>
+<td>3306</td>
+<td>4044</td>
+<td>12538</td>
+</tr>
+<tr>
+<td>1</td>
+<td>100</td>
+<td>10000</td>
+<td>148</td>
+<td>176</td>
+<td>187</td>
+<td>626</td>
+</tr>
+<tr>
+<td>1</td>
+<td>100</td>
+<td>100000</td>
+<td>1507</td>
+<td>1672</td>
+<td>1887</td>
+<td>6230</td>
+</tr>
+<tr>
+<td>1</td>
+<td>100</td>
+<td>1000000</td>
+<td>15431</td>
+<td>16738</td>
+<td>19424</td>
+<td>62293</td>
+</tr>
+<tr>
+<td>1</td>
+<td>100</td>
+<td>2000000</td>
+<td>28986</td>
+<td>32689</td>
+<td>37049</td>
+<td>125551</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>100</td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>1000</td>
+<td>13</td>
+<td>18</td>
+<td>18</td>
+<td>59</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>10000</td>
+<td>140</td>
+<td>158</td>
+<td>203</td>
+<td>614</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>20000</td>
+<td>281</td>
+<td>319</td>
+<td>364</td>
+<td>1230</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>1000</td>
+<td>17</td>
+<td>34</td>
+<td>41</td>
+<td>16</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>10000</td>
+<td>160</td>
+<td>264</td>
+<td>281</td>
+<td>119</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>100000</td>
+<td>1572</td>
+<td>2347</td>
+<td>2079</td>
+<td>1093</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>200000</td>
+<td>3329</td>
+<td>4643</td>
+<td>4109</td>
+<td>3812</td>
+</tr>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>10000</td>
+<td>208</td>
+<td>244</td>
+<td>201</td>
+<td>162</td>
+</tr>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>100000</td>
+<td>1653</td>
+<td>2300</td>
+<td>2102</td>
+<td>2109</td>
+</tr>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>1000000</td>
+<td>16670</td>
+<td>23536</td>
+<td>20370</td>
+<td>19270</td>
+</tr>
+<tr>
+<td>10</td>
+<td>100</td>
+<td>2000000</td>
+<td>33487</td>
+<td>46660</td>
+<td>40939</td>
+<td>37694</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>100</td>
+<td>1</td>
+<td>5</td>
+<td>4</td>
+<td>7</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>1000</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>58</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>10000</td>
+<td>147</td>
+<td>158</td>
+<td>168</td>
+<td>579</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1</td>
+<td>20000</td>
+<td>283</td>
+<td>346</td>
+<td>350</td>
+<td>1191</td>
+</tr>
+<tr>
+<td>20</td>
+<td>10</td>
+<td>1000</td>
+<td>17</td>
+<td>24</td>
+<td>24</td>
+<td>12</td>
+</tr>
+<tr>
+<td>20</td>
+<td>10</td>
+<td>10000</td>
+<td>154</td>
+<td>228</td>
+<td>212</td>
+<td>106</td>
+</tr>
+<tr>
+<td>20</td>
+<td>10</td>
+<td>100000</td>
+<td>1643</td>
+<td>2274</td>
+<td>2036</td>
+<td>1137</td>
+</tr>
+<tr>
+<td>20</td>
+<td>10</td>
+<td>200000</td>
+<td>3222</td>
+<td>4498</td>
+<td>4043</td>
+<td>3617</td>
+</tr>
+<tr>
+<td>20</td>
+<td>100</td>
+<td>10000</td>
+<td>171</td>
+<td>229</td>
+<td>216</td>
+<td>229</td>
+</tr>
+<tr>
+<td>20</td>
+<td>100</td>
+<td>100000</td>
+<td>1714</td>
+<td>2292</td>
+<td>2148</td>
+<td>1922</td>
+</tr>
+<tr>
+<td>20</td>
+<td>100</td>
+<td>1000000</td>
+<td>17266</td>
+<td>22957</td>
+<td>21735</td>
+<td>20052</td>
+</tr>
+<tr>
+<td>20</td>
+<td>100</td>
+<td>2000000</td>
+<td>34316</td>
+<td>46796</td>
+<td>43313</td>
+<td>39711</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>100</td>
+<td>1</td>
+<td>4</td>
+<td>2</td>
+<td>8</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>1000</td>
+<td>19</td>
+<td>16</td>
+<td>17</td>
+<td>59</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>10000</td>
+<td>150</td>
+<td>164</td>
+<td>171</td>
+<td>589</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>20000</td>
+<td>312</td>
+<td>346</td>
+<td>348</td>
+<td>1201</td>
+</tr>
+<tr>
+<td>50</td>
+<td>10</td>
+<td>1000</td>
+<td>16</td>
+<td>23</td>
+<td>21</td>
+<td>12</td>
+</tr>
+<tr>
+<td>50</td>
+<td>10</td>
+<td>10000</td>
+<td>161</td>
+<td>253</td>
+<td>202</td>
+<td>103</td>
+</tr>
+<tr>
+<td>50</td>
+<td>10</td>
+<td>100000</td>
+<td>1657</td>
+<td>2329</td>
+<td>2014</td>
+<td>1115</td>
+</tr>
+<tr>
+<td>50</td>
+<td>10</td>
+<td>200000</td>
+<td>3355</td>
+<td>4767</td>
+<td>4092</td>
+<td>3624</td>
+</tr>
+<tr>
+<td>50</td>
+<td>100</td>
+<td>10000</td>
+<td>171</td>
+<td>235</td>
+<td>229</td>
+<td>168</td>
+</tr>
+<tr>
+<td>50</td>
+<td>100</td>
+<td>100000</td>
+<td>1711</td>
+<td>2405</td>
+<td>2235</td>
+<td>2035</td>
+</tr>
+<tr>
+<td>50</td>
+<td>100</td>
+<td>1000000</td>
+<td>17443</td>
+<td>24013</td>
+<td>22610</td>
+<td>20424</td>
+</tr>
+<tr>
+<td>50</td>
+<td>100</td>
+<td>2000000</td>
+<td>33214</td>
+<td>48154</td>
+<td>45750</td>
+<td>40724</td>
+</tr>
+</tbody></table>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/57831/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2019-06-11 22:49:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/java/" title="java">
+                        #java
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/log4j/" title="log4j">
+                        #log4j
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/64849/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#log4j-xml"><span class="toc-text">log4j.xml</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#log4j2-xml"><span class="toc-text">log4j2.xml</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#TIPS"><span class="toc-text">TIPS</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

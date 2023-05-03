@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      mycat（3）监控 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">mycat（3）监控</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2018-12-20 22:23:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/java/" title="java">
+                    #java
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/mycat/" title="mycat">
+                    #mycat
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="1、日志平台监控"><a href="#1、日志平台监控" class="headerlink" title="1、日志平台监控"></a><strong>1、日志平台监控</strong></h2><p>关于log4j.xml的配置可以自行百度，这里不做详解。<br>最初的启动日志应该是长这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">2018-12-20 23:37:50.232  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDBPool.&lt;init&gt;(PhysicalDBPool.java:101)) - total resouces of dataHost localhost1 is :3</span><br><span class="line">2018-12-20 23:37:50.237  INFO [WrapperSimpleAppMain] (io.mycat.cache.CacheService.createLayeredPool(CacheService.java:125)) - create layer cache pool TableID2DataNodeCache of type encache ,default cache size 10000 ,default expire seconds18000</span><br><span class="line">2018-12-20 23:37:50.238  INFO [WrapperSimpleAppMain] (io.mycat.cache.DefaultLayedCachePool.createChildCache(DefaultLayedCachePool.java:80)) - create child Cache: TESTDB_ORDERS for layered cache TableID2DataNodeCache, size 50000, expire seconds 18000</span><br><span class="line">2018-12-20 23:37:50.320  INFO [WrapperSimpleAppMain] (io.mycat.config.classloader.DynaClassLoader.&lt;init&gt;(DynaClassLoader.java:34)) - dyna class load from .\catlet,and auto check for class file modified every 60 seconds</span><br><span class="line"># mycat 准备就绪启动</span><br><span class="line">2018-12-20 23:37:50.338  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:317)) - MyCat is ready to startup ...</span><br><span class="line"># 启动的线程数，默认是CPU的个数，和线程池大小，可以在server.xml文件中配置</span><br><span class="line">2018-12-20 23:37:50.338  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:329)) - Startup processors ...,total processors:12,aio thread pool size:24</span><br><span class="line"># socket的缓存池大小</span><br><span class="line"> each process allocated socket buffer pool  bytes ,a page size:2097152  a page&#x27;s chunk number(PageSize/ChunkSize) is:512  buffer page&#x27;s number is:240</span><br><span class="line"># 系统的配置，包括自己配置的和默认的配置，均可以在server.xml文件中修改</span><br><span class="line">2018-12-20 23:37:50.339  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:330)) - sysconfig params:SystemConfig [processorBufferLocalPercent=100, frontSocketSoRcvbuf=1048576, frontSocketSoSndbuf=4194304, backSocketSoRcvbuf=4194304, backSocketSoSndbuf=1048576, frontSocketNoDelay=1, backSocketNoDelay=1, maxStringLiteralLength=65535, frontWriteQueueSize=2048, bindIp=0.0.0.0, serverPort=8066, managerPort=9066, charset=utf8, processors=12, processorExecutor=24, timerExecutor=2, managerExecutor=2, idleTimeout=1800000, catletClassCheckSeconds=60, sqlExecuteTimeout=300, processorCheckPeriod=1000, dataNodeIdleCheckPeriod=300000, dataNodeHeartbeatPeriod=10000, clusterHeartbeatUser=_HEARTBEAT_USER_, clusterHeartbeatPass=_HEARTBEAT_PASS_, clusterHeartbeatPeriod=5000, clusterHeartbeatTimeout=10000, clusterHeartbeatRetry=10, txIsolation=3, parserCommentVersion=50148, sqlRecordCount=10, bufferPoolPageSize=2097152, bufferPoolChunkSize=4096, bufferPoolPageNumber=240, maxResultSet=524288, bigResultSizeSqlCount=10, bufferUsagePercent=80, flowControlRejectStrategy=0, clearBigSqLResultSetMapMs=600000, defaultMaxLimit=100, sequnceHandlerType=2, sqlInterceptor=io.mycat.server.interceptor.impl.DefaultSqlInterceptor, sqlInterceptorType=select, sqlInterceptorFile=D:\program\mycat\Mycat-server-1.6.5-release-20180122220033-win\mycat/logs/sql.txt, mutiNodeLimitType=0, mutiNodePatchSize=100, defaultSqlParser=druidparser, usingAIO=0, packetHeaderSize=4, maxPacketSize=16777216, mycatNodeId=1]</span><br><span class="line">2018-12-20 23:37:50.555  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:53)) - useOffHeapForMerge = 1</span><br><span class="line">2018-12-20 23:37:50.555  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:54)) - memoryPageSize = 64k</span><br><span class="line">2018-12-20 23:37:50.555  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:55)) - spillsFileBufferSize = 1k</span><br><span class="line">2018-12-20 23:37:50.555  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:56)) - useStreamOutput = 0</span><br><span class="line">2018-12-20 23:37:50.555  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:57)) - systemReserveMemorySize = 384m</span><br><span class="line">2018-12-20 23:37:50.563  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:58)) - totalNetWorkBufferSize = 480MB</span><br><span class="line">2018-12-20 23:37:50.563  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:59)) - dataNodeSortedTempDir = D:\program\mycat\Mycat-server-1.6.5-release-20180122220033-win\mycat</span><br><span class="line">2018-12-20 23:37:50.565  INFO [WrapperSimpleAppMain] (io.mycat.memory.MyCatMemory.&lt;init&gt;(MyCatMemory.java:122)) - mycat.memory.offHeap.size: 761MB</span><br><span class="line">2018-12-20 23:37:50.569  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:437)) - using nio network handler </span><br><span class="line"># mycat 管理的端口号</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:453)) - $_MyCatManager is started and listening on 9066</span><br><span class="line"># mycat 服务的端口号</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:457)) - $_MyCatServer is started and listening on 8066</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:459)) - ===============================================</span><br><span class="line"># 开始初始化数据节点</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:463)) - Initialize dataHost ...</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:467)) - init datahost: localhost1  to use datasource index:1</span><br><span class="line"># 初始化物理数据库连接池，其中连接数10即为minCon配置的最小连接数</span><br><span class="line">2018-12-20 23:37:50.586  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDBPool.initSource(PhysicalDBPool.java:303)) - init backend myqsl source ,create connections total 10 for hostS1 index :1</span><br><span class="line"># 创建对各个物理数据库的连接，数量为配置的minCon=10</span><br><span class="line">2018-12-20 23:37:50.587  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db3</span><br><span class="line">2018-12-20 23:37:50.588  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db2</span><br><span class="line">2018-12-20 23:37:50.588  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db1</span><br><span class="line">2018-12-20 23:37:50.588  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db3</span><br><span class="line">2018-12-20 23:37:50.588  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db2</span><br><span class="line">2018-12-20 23:37:50.588  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db1</span><br><span class="line">2018-12-20 23:37:50.589  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db3</span><br><span class="line">2018-12-20 23:37:50.589  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db2</span><br><span class="line">2018-12-20 23:37:50.589  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db1</span><br><span class="line">2018-12-20 23:37:50.589  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostS1 of schema db3</span><br><span class="line"># 创建连接成功的一些信息，同样是minCon</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-7-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=7, lastTime=1545320270608, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=695, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-5-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=5, lastTime=1545320270608, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=691, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-2-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=2, lastTime=1545320270608, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=699, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-8-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=8, lastTime=1545320270608, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=694, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-6-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=6, lastTime=1545320270608, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=692, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-10-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=10, lastTime=1545320270608, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=700, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-9-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=9, lastTime=1545320270608, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=698, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-3-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=3, lastTime=1545320270608, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=697, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-1-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=1, lastTime=1545320270608, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=693, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.608  INFO [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.GetConnectionHandler.connectionAcquired(GetConnectionHandler.java:67)) - connected successfuly MySQLConnection [id=4, lastTime=1545320270608, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=696, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line"># 初始化结果，完成10个，成功了10个，目标是10个</span><br><span class="line">2018-12-20 23:37:50.689  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDBPool.initSource(PhysicalDBPool.java:328)) - init result :finished 10 success 10 target count:10</span><br><span class="line"># 初始化成功</span><br><span class="line">2018-12-20 23:37:50.689  INFO [WrapperSimpleAppMain] (io.mycat.backend.datasource.PhysicalDBPool.init(PhysicalDBPool.java:274)) - localhost1 index:1 init success</span><br><span class="line">2018-12-20 23:37:50.691  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:501)) - ===============================================</span><br><span class="line"># 往后就是连接池的自动管理，就是连接池的自动开关增加减少</span><br><span class="line">2018-12-20 23:37:50.691  INFO [Timer0] (io.mycat.backend.datasource.PhysicalDatasource.createByIdleLitte(PhysicalDatasource.java:390)) - create connections ,because idle connection not enough ,cur is 0, minCon is 10 for hostS2</span><br><span class="line">2018-12-20 23:37:50.691  INFO [WrapperSimpleAppMain] (io.mycat.MycatServer.startup(MycatServer.java:502)) - Perform XA recovery log ...</span><br><span class="line">2018-12-20 23:37:50.707  INFO [Timer1] (io.mycat.backend.datasource.PhysicalDatasource.getConnection(PhysicalDatasource.java:529)) - no ilde connection in pool,create new connection for hostM1 of schema db3</span><br><span class="line">2018-12-20 23:37:50.710  INFO [$_NIOREACTOR-1-RW] (io.mycat.backend.mysql.nio.handler.NewConnectionRespHandler.connectionAcquired(NewConnectionRespHandler.java:44)) - connectionAcquired MySQLConnection [id=13, lastTime=1545320270710, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=true, threadId=703, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.710  INFO [$_NIOREACTOR-0-RW] (io.mycat.backend.mysql.nio.handler.NewConnectionRespHandler.connectionAcquired(NewConnectionRespHandler.java:44)) - connectionAcquired MySQLConnection [id=12, lastTime=1545320270710, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=true, threadId=701, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-20 23:37:50.710  INFO [$_NIOREACTOR-11-RW] (io.mycat.backend.mysql.nio.handler.NewConnectionRespHandler.connectionAcquired(NewConnectionRespHandler.java:44)) - connectionAcquired MySQLConnection [id=11, lastTime=1545320270710, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=true, threadId=702, charset=latin1, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果想要看到更多日志信息，可以把log4j.xml中把日志的输出级别修改为debug级别。日志系统设定为每分钟读取一次，所以修改完之后，不用重启mycat即可生效。<br>比如执行之前的sql语句<code>CREATE TABLE </code>company<code> (</code>id<code> INT (11) NOT NULL,</code>name<code> VARCHAR (100),</code>sharding_id<code> INT (11) NOT NULL,PRIMARY KEY (</code>id<code>))</code>，就会得到下面的日志:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">2018-12-21 00:04:38.941 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.net.FrontendConnection.query(FrontendConnection.java:289)) - ServerConnection [id=2, schema=testdb, host=0:0:0:0:0:0:0:1, user=root,txIsolation=3, autocommit=true, schema=testdb] CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))</span><br><span class="line">2018-12-21 00:04:38.941 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.server.ServerQueryHandler.query(ServerQueryHandler.java:57)) - ServerConnection [id=2, schema=testdb, host=0:0:0:0:0:0:0:1, user=root,txIsolation=3, autocommit=true, schema=testdb]CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))</span><br><span class="line">2018-12-21 00:04:38.941 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.server.NonBlockingSession.execute(NonBlockingSession.java:126)) - ServerConnection [id=2, schema=testdb, host=0:0:0:0:0:0:0:1, user=root,txIsolation=3, autocommit=true, schema=testdb]CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`)), route=&#123;</span><br><span class="line">   1 -&gt; dn1&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;</span><br><span class="line">   2 -&gt; dn2&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;</span><br><span class="line">   3 -&gt; dn3&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;</span><br><span class="line">&#125; rrs </span><br><span class="line">2018-12-21 00:04:38.944 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.&lt;init&gt;(MultiNodeQueryHandler.java:124)) - execute mutinode query CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))</span><br><span class="line">2018-12-21 00:04:38.944 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.execute(MultiNodeQueryHandler.java:193)) - rrs.getRunOnSlave()-null</span><br><span class="line">2018-12-21 00:04:38.944 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.execute(MultiNodeQueryHandler.java:203)) - node.getRunOnSlave()1-null</span><br><span class="line">2018-12-21 00:04:38.944 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.execute(MultiNodeQueryHandler.java:205)) - node.getRunOnSlave()2-null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.datasource.PhysicalDBNode.getConnection(PhysicalDBNode.java:96)) - rrs.getRunOnSlave() null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.datasource.PhysicalDBNode.getConnection(PhysicalDBNode.java:127)) - rrs.getRunOnSlave() null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.MySQLConnection.synAndDoExecute(MySQLConnection.java:451)) - con need syn ,total syn cmd 1 commands SET names utf8mb4;schema change:false con:MySQLConnection [id=2, lastTime=1545321878945, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=736, charset=utf8, txIsolation=3, autocommit=true, attachment=dn1&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-2-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:false from MySQLConnection [id=2, lastTime=1545321878927, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=736, charset=utf8, txIsolation=3, autocommit=true, attachment=dn1&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=io.mycat.backend.mysql.nio.MySQLConnection$StatusSync@3ac61600, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.execute(MultiNodeQueryHandler.java:203)) - node.getRunOnSlave()1-null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.execute(MultiNodeQueryHandler.java:205)) - node.getRunOnSlave()2-null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.datasource.PhysicalDBNode.getConnection(PhysicalDBNode.java:96)) - rrs.getRunOnSlave() null</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-6-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:false from MySQLConnection [id=6, lastTime=1545321878927, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=737, charset=utf8, txIsolation=3, autocommit=true, attachment=dn2&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=io.mycat.backend.mysql.nio.MySQLConnection$StatusSync@5c4f2efd, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.945 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.datasource.PhysicalDBNode.getConnection(PhysicalDBNode.java:127)) - rrs.getRunOnSlave() null</span><br><span class="line">2018-12-21 00:04:38.946 DEBUG [$_NIOREACTOR-4-RW] (io.mycat.backend.mysql.nio.MySQLConnection.synAndDoExecute(MySQLConnection.java:451)) - con need syn ,total syn cmd 1 commands SET names utf8mb4;schema change:false con:MySQLConnection [id=5, lastTime=1545321878945, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=734, charset=utf8, txIsolation=3, autocommit=true, attachment=dn3&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line"># 在执行玩之后会返回执行状态，并且释放连接</span><br><span class="line">2018-12-21 00:04:38.946 DEBUG [$_NIOREACTOR-5-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:false from MySQLConnection [id=5, lastTime=1545321878927, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=734, charset=utf8, txIsolation=3, autocommit=true, attachment=dn3&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=io.mycat.backend.mysql.nio.MySQLConnection$StatusSync@16891750, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.993 DEBUG [$_NIOREACTOR-6-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:true from MySQLConnection [id=6, lastTime=1545321878927, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=737, charset=utf8, txIsolation=3, autocommit=true, attachment=dn2&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.993 DEBUG [$_NIOREACTOR-6-RW] (io.mycat.server.NonBlockingSession.releaseConnection(NonBlockingSession.java:378)) - release connection MySQLConnection [id=6, lastTime=1545321878927, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=737, charset=utf8, txIsolation=3, autocommit=true, attachment=dn2&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.993 DEBUG [$_NIOREACTOR-6-RW] (io.mycat.backend.datasource.PhysicalDatasource.releaseChannel(PhysicalDatasource.java:595)) - release channel MySQLConnection [id=6, lastTime=1545321878927, user=root, schema=db2, old shema=db2, borrowed=true, fromSlaveDB=false, threadId=737, charset=utf8, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-21 00:04:38.997 DEBUG [$_NIOREACTOR-5-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:true from MySQLConnection [id=5, lastTime=1545321878927, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=734, charset=utf8, txIsolation=3, autocommit=true, attachment=dn3&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.997 DEBUG [$_NIOREACTOR-5-RW] (io.mycat.server.NonBlockingSession.releaseConnection(NonBlockingSession.java:378)) - release connection MySQLConnection [id=5, lastTime=1545321878927, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=734, charset=utf8, txIsolation=3, autocommit=true, attachment=dn3&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br><span class="line">2018-12-21 00:04:38.997 DEBUG [$_NIOREACTOR-5-RW] (io.mycat.backend.datasource.PhysicalDatasource.releaseChannel(PhysicalDatasource.java:595)) - release channel MySQLConnection [id=5, lastTime=1545321878927, user=root, schema=db3, old shema=db3, borrowed=true, fromSlaveDB=false, threadId=734, charset=utf8, txIsolation=3, autocommit=true, attachment=null, respHandler=null, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=false]</span><br><span class="line">2018-12-21 00:04:39.016 DEBUG [$_NIOREACTOR-2-RW] (io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler.okResponse(MultiNodeQueryHandler.java:254)) - received ok response ,executeResponse:true from MySQLConnection [id=2, lastTime=1545321878927, user=root, schema=db1, old shema=db1, borrowed=true, fromSlaveDB=false, threadId=736, charset=utf8, txIsolation=3, autocommit=true, attachment=dn1&#123;CREATE TABLE `company` (`id` INT (11) NOT NULL,`name` VARCHAR (100),`sharding_id` INT (11) NOT NULL,PRIMARY KEY (`id`))&#125;, respHandler=io.mycat.backend.mysql.nio.handler.MultiNodeQueryHandler@f633b4d, host=localhost, port=3306, statusSync=null, writeQueue=0, modifiedSQLExecuted=true]</span><br></pre></td></tr></table></figure>
+
+<p>mycat的sql执行流程：如附件所示</p>
+<p>sql经过ServerConnection的处理之后，经过MultiNodeQuery，根据sql中的信息，判断是哪个物理数据库处理，然后将得到的结果返回给MultiNodeQuery， 在把结果传至DataMergeService进行合并，排序，分组等相关操作，返回给然后将得到的结果返回给MultiNodeQuery。</p>
+<p>悄悄的说，debug日志打开之后，很多日志还没有研究，后续一边用一边研究吧。</p>
+<h2 id="2、管理系统监控"><a href="#2、管理系统监控" class="headerlink" title="2、管理系统监控"></a><strong>2、管理系统监控</strong></h2><p>进入管理界面：</p>
+<blockquote>
+<p>mysql -uroot -p123456 -P9066</p>
+</blockquote>
+<h3 id="查看所有的命令行工具"><a href="#查看所有的命令行工具" class="headerlink" title="查看所有的命令行工具"></a><strong>查看所有的命令行工具</strong></h3><blockquote>
+<p>show @@help</p>
+</blockquote>
+<p>得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------------------+--------------------------------------------+</span><br><span class="line">| STATEMENT                                | DESCRIPTION                                |</span><br><span class="line">+------------------------------------------+--------------------------------------------+</span><br><span class="line">| show @@time.current                      | Report current timestamp                   |</span><br><span class="line">| show @@time.startup                      | Report startup timestamp                   |</span><br><span class="line">| show @@version                           | Report Mycat Server version                |</span><br><span class="line">| show @@server                            | Report server status                       |</span><br><span class="line">| show @@threadpool                        | Report threadPool status                   |</span><br><span class="line">| show @@database                          | Report databases                           |</span><br><span class="line">| show @@datanode                          | Report dataNodes                           |</span><br><span class="line">| show @@datanode where schema = ?         | Report dataNodes                           |</span><br><span class="line">| show @@datasource                        | Report dataSources                         |</span><br><span class="line">| show @@datasource where dataNode = ?     | Report dataSources                         |</span><br><span class="line">| show @@datasource.synstatus              | Report datasource data synchronous         |</span><br><span class="line">| show @@datasource.syndetail where name=? | Report datasource data synchronous detail  |</span><br><span class="line">| show @@datasource.cluster                | Report datasource galary cluster variables |</span><br><span class="line">| show @@processor                         | Report processor status                    |</span><br><span class="line">| show @@command                           | Report commands status                     |</span><br><span class="line">| show @@connection                        | Report connection status                   |</span><br><span class="line">| show @@cache                             | Report system cache usage                  |</span><br><span class="line">| show @@backend                           | Report backend connection status           |</span><br><span class="line">| show @@session                           | Report front session details               |</span><br><span class="line">| show @@connection.sql                    | Report connection sql                      |</span><br><span class="line">| show @@sql.execute                       | Report execute status                      |</span><br><span class="line">| show @@sql.detail where id = ?           | Report execute detail status               |</span><br><span class="line">| show @@sql                               | Report SQL list                            |</span><br><span class="line">| show @@sql.high                          | Report Hight Frequency SQL                 |</span><br><span class="line">| show @@sql.slow                          | Report slow SQL                            |</span><br><span class="line">| show @@sql.resultset                     | Report BIG RESULTSET SQL                   |</span><br><span class="line">| show @@sql.sum                           | Report  User RW Stat                       |</span><br><span class="line">| show @@sql.sum.user                      | Report  User RW Stat                       |</span><br><span class="line">| show @@sql.sum.table                     | Report  Table RW Stat                      |</span><br><span class="line">| show @@parser                            | Report parser status                       |</span><br><span class="line">| show @@router                            | Report router status                       |</span><br><span class="line">| show @@heartbeat                         | Report heartbeat status                    |</span><br><span class="line">| show @@heartbeat.detail where name=?     | Report heartbeat current detail            |</span><br><span class="line">| show @@slow where schema = ?             | Report schema slow sql                     |</span><br><span class="line">| show @@slow where datanode = ?           | Report datanode slow sql                   |</span><br><span class="line">| show @@sysparam                          | Report system param                        |</span><br><span class="line">| show @@syslog limit=?                    | Report system mycat.log                    |</span><br><span class="line">| show @@white                             | show mycat white host                      |</span><br><span class="line">| show @@white.set=?,?                     | set mycat white host,[ip,user]             |</span><br><span class="line">| show @@directmemory=1 or 2               | show mycat direct memory usage             |</span><br><span class="line">| switch @@datasource name:index           | Switch dataSource                          |</span><br><span class="line">| kill @@connection id1,id2,...            | Kill the specified connections             |</span><br><span class="line">| stop @@heartbeat name:time               | Pause dataNode heartbeat                   |</span><br><span class="line">| reload @@config                          | Reload basic config from file              |</span><br><span class="line">| reload @@config_all                      | Reload all config from file                |</span><br><span class="line">| reload @@route                           | Reload route config from file              |</span><br><span class="line">| reload @@user                            | Reload user config from file               |</span><br><span class="line">| reload @@sqlslow=                        | Set Slow SQL Time(ms)                      |</span><br><span class="line">| reload @@user_stat                       | Reset show @@sql  @@sql.sum @@sql.slow     |</span><br><span class="line">| rollback @@config                        | Rollback all config from memory            |</span><br><span class="line">| rollback @@route                         | Rollback route config from memory          |</span><br><span class="line">| rollback @@user                          | Rollback user config from memory           |</span><br><span class="line">| reload @@sqlstat=open                    | Open real-time sql stat analyzer           |</span><br><span class="line">| reload @@sqlstat=close                   | Close real-time sql stat analyzer          |</span><br><span class="line">| offline                                  | Change MyCat status to OFF                 |</span><br><span class="line">| online                                   | Change MyCat status to ON                  |</span><br><span class="line">| clear @@slow where schema = ?            | Clear slow sql by schema                   |</span><br><span class="line">| clear @@slow where datanode = ?          | Clear slow sql by datanode                 |</span><br><span class="line">+------------------------------------------+--------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<p>下面说几个比较重要的：</p>
+<h3 id="查看系统运行情况"><a href="#查看系统运行情况" class="headerlink" title="查看系统运行情况"></a><strong>查看系统运行情况</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@server;</span><br><span class="line">+---------------+-------------+--------------+------------+---------------+---------------+---------+--------+</span><br><span class="line">| 启动多长时间  | 使用的内存  | 总共的内存   | 最大的内存 | 上次加载的时间|               | 字符集  |  状态  |</span><br><span class="line">+---------------+-------------+--------------+------------+---------------+---------------+---------+--------+</span><br><span class="line">| UPTIME        | USED_MEMORY | TOTAL_MEMORY | MAX_MEMORY | RELOAD_TIME   | ROLLBACK_TIME | CHARSET | STATUS |</span><br><span class="line">+---------------+-------------+--------------+------------+---------------+---------------+---------+--------+</span><br><span class="line">| 25m 41s 530ms |   105986784 |   1029177344 | 3817865216 | 1545321725058 |            -1 | gbk     | ON     |</span><br><span class="line">+---------------+-------------+--------------+------------+---------------+---------------+---------+--------+</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看NIO-Reactor信息"><a href="#查看NIO-Reactor信息" class="headerlink" title="查看NIO Reactor信息"></a><strong>查看NIO Reactor信息</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@processor;</span><br><span class="line">+-------------+--------+---------+-------------+---------+---------+---------------+--------------+------------+----------+----------+----------+</span><br><span class="line">|    名字     |进入流量 | 出去流量 | Reactor数量 |  读队列  | 写队列  |  空闲BUFFER    |   总的BUFFER |   使用占比  | BU_WARNS |前端连接数 |后端连接数 |</span><br><span class="line">+-------------+--------+---------+-------------+---------+---------+---------------+--------------+------------+----------+----------+----------+</span><br><span class="line">| NAME        | NET_IN | NET_OUT | REACT_COUNT | R_QUEUE | W_QUEUE | FREE_BUFFER   | TOTAL_BUFFER | BU_PERCENT | BU_WARNS | FC_COUNT | BC_COUNT |</span><br><span class="line">+-------------+--------+---------+-------------+---------+---------+---------------+--------------+------------+----------+----------+----------+</span><br><span class="line">| Processor0  |   1372 |     506 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor1  |  20701 |    2469 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        3 |</span><br><span class="line">| Processor2  |  26198 |    4264 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        3 |</span><br><span class="line">| Processor3  |    760 |    2787 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        1 |        1 |</span><br><span class="line">| Processor4  |   1118 |   30275 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor5  |   5610 |    1589 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor6  |   4204 |    1247 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor7  |    704 |     258 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor8  |   5810 |    1500 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor9  |    556 |     222 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        1 |</span><br><span class="line">| Processor10 |   5070 |    1320 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">| Processor11 |  10547 |     275 |           0 |       0 |       0 | 2061584302080 |    503316480 |    -409500 |        0 |        0 |        2 |</span><br><span class="line">+-------------+--------+---------+-------------+---------+---------+---------------+--------------+------------+----------+----------+----------+</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看线程池"><a href="#查看线程池" class="headerlink" title="查看线程池"></a><strong>查看线程池</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;  show @@threadPool;</span><br><span class="line">+------------------+-----------+--------------+-----------------+----------------+------------+</span><br><span class="line">| NAME             | POOL_SIZE | ACTIVE_COUNT | TASK_QUEUE_SIZE | COMPLETED_TASK | TOTAL_TASK |</span><br><span class="line">+------------------+-----------+--------------+-----------------+----------------+------------+</span><br><span class="line">| Timer            |         2 |            0 |               0 |           5801 |       5801 |</span><br><span class="line">| BusinessExecutor |        24 |            0 |               0 |             27 |         27 |</span><br><span class="line">+------------------+-----------+--------------+-----------------+----------------+------------+</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看前端连接池信息"><a href="#查看前端连接池信息" class="headerlink" title="查看前端连接池信息"></a><strong>查看前端连接池信息</strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@connection;</span><br><span class="line">+------------+------+-----------------+------+------------+------+--------+---------+--------+---------+---------------+-------------+------------+---------+------------+</span><br><span class="line">| PROCESSOR  | ID   | HOST            | PORT | LOCAL_PORT | USER | SCHEMA | CHARSET | NET_IN | NET_OUT | ALIVE_TIME(S) | RECV_BUFFER | SEND_QUEUE | txlevel | autocommit |</span><br><span class="line">+------------+------+-----------------+------+------------+------+--------+---------+--------+---------+---------------+-------------+------------+---------+------------+</span><br><span class="line">| Processor3 |    3 | 0:0:0:0:0:0:0:1 | 9066 |       8160 | root | NULL   | gbk:28  |    206 |    2484 |          1011 |        4096 |          0 |         |            |</span><br><span class="line">+------------+------+-----------------+------+------------+------+--------+---------+--------+---------+---------------+-------------+------------+---------+------------+</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看后台连接池信息"><a href="#查看后台连接池信息" class="headerlink" title="查看后台连接池信息"></a><strong>查看后台连接池信息</strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@backend;</span><br><span class="line">+-------------+------+---------+-----------+------+--------+--------+---------+------+--------+----------+------------+--------+----------+---------+------------+</span><br><span class="line">| processor   | id   | mysqlId | host      | port | l_port | net_in | net_out | life | closed | borrowed | SEND_QUEUE | schema | charset  | txlevel | autocommit |</span><br><span class="line">+-------------+------+---------+-----------+------+--------+--------+---------+------+--------+----------+------------+--------+----------+---------+------------+</span><br><span class="line">| Processor0  |   22 |     752 | localhost | 3306 |   8157 |   1499 |     408 | 1113 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor1  |    1 |     732 | localhost | 3306 |   7738 |   3793 |     966 | 2613 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor1  |   23 |     750 | localhost | 3306 |   8155 |    241 |     102 | 1113 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor1  |   13 |     740 | localhost | 3306 |   7746 |  18073 |    1743 | 2613 | false  | false    |          0 | db3    | utf8:45  | 3       | true       |</span><br><span class="line">| Processor2  |   24 |     751 | localhost | 3306 |   8156 |   1425 |     390 | 1113 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor2  |   14 |     742 | localhost | 3306 |   7748 |  29394 |    4817 | 2613 | false  | false    |          0 | db3    | utf8:45  | 3       | true       |</span><br><span class="line">| Processor3  |    3 |     735 | localhost | 3306 |   7744 |    463 |     156 | 2613 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor4  |    4 |     729 | localhost | 3306 |   7735 |    463 |     156 | 2613 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor4  |   25 |     753 | localhost | 3306 |   8385 |   1055 |     300 |  813 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor5  |    5 |     734 | localhost | 3306 |   7740 |   3741 |    1091 | 2613 | false  | false    |          0 | db3    | utf8:45  | 3       | true       |</span><br><span class="line">| Processor5  |   26 |     754 | localhost | 3306 |   8596 |    315 |     120 |  213 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor5  |   15 |     743 | localhost | 3306 |   7832 |   3201 |     822 | 2313 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor6  |   16 |     744 | localhost | 3306 |   7833 |   4459 |    1128 | 2313 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor6  |    6 |     737 | localhost | 3306 |   7741 |    485 |     299 | 2613 | false  | false    |          0 | db2    | utf8:45  | 3       | true       |</span><br><span class="line">| Processor6  |   27 |     755 | localhost | 3306 |   8597 |    315 |     120 |  213 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor7  |   17 |     745 | localhost | 3306 |   7834 |    389 |     138 | 2313 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor8  |   18 |     746 | localhost | 3306 |   7884 |   3349 |     858 | 2013 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor8  |    8 |     731 | localhost | 3306 |   7737 |   3793 |     966 | 2613 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor9  |   19 |     747 | localhost | 3306 |   7885 |    389 |     138 | 2013 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor10 |   20 |     748 | localhost | 3306 |   7952 |   2609 |     678 | 1713 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor10 |   10 |     733 | localhost | 3306 |   7739 |   3793 |     966 | 2613 | false  | false    |          0 | db3    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor11 |   21 |     749 | localhost | 3306 |   7953 |    315 |     120 | 1713 | false  | false    |          0 | db2    | latin1:5 | 3       | true       |</span><br><span class="line">| Processor11 |   11 |     739 | localhost | 3306 |   7745 |  10380 |     191 | 2613 | false  | false    |          0 | db2    | utf8:45  | 3       | true       |</span><br><span class="line">+-------------+------+---------+-----------+------+--------+--------+---------+------+--------+----------+------------+--------+----------+---------+------------+</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看心跳信息"><a href="#查看心跳信息" class="headerlink" title="查看心跳信息"></a><strong>查看心跳信息</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@heartbeat;</span><br><span class="line">+--------+-------+-----------+------+---------+-------+--------+---------+--------------+---------------------+-------+</span><br><span class="line">| NAME   | TYPE  | HOST      | PORT | RS_CODE | RETRY | STATUS | TIMEOUT | EXECUTE_TIME | LAST_ACTIVE_TIME    | STOP  |</span><br><span class="line">+--------+-------+-----------+------+---------+-------+--------+---------+--------------+---------------------+-------+</span><br><span class="line">| hostM1 | mysql | localhost | 3306 |       1 |     0 | idle   |       0 | 0,0,0        | 2018-12-21 00:46:15 | false |</span><br><span class="line">| hostS1 | mysql | localhost | 3306 |       1 |     0 | idle   |       0 | 0,0,0        | 2018-12-21 00:46:15 | false |</span><br><span class="line">| hostS2 | mysql | localhost | 3306 |       1 |     0 | idle   |       0 | 0,0,0        | 2018-12-21 00:46:15 | false |</span><br><span class="line">+--------+-------+-----------+------+---------+-------+--------+---------+--------------+---------------------+-------+</span><br><span class="line"># 心跳正常RE_CODE=1</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看系统参数"><a href="#查看系统参数" class="headerlink" title="查看系统参数"></a><strong>查看系统参数</strong></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show @@sysparam;</span><br><span class="line">+-------------------------------+---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| PARAM_NAME                    | PARAM_VALUE   | PARAM_DESCR                                                                                                                                                                                                                                                   |</span><br><span class="line">+-------------------------------+---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| processors                    | 12            | 主要用于指定系统可用的线程数，默认值为Runtime.getRuntime().availableProcessors()方法返回的值。主要影响processorBufferPool、processorBufferLocalPercent、processorExecutor属性。NIOProcessor的个数也是由这个属性定义的，所以调优的时候可以适当的调高这个属性。             |</span><br><span class="line">| processorBufferChunk          | 4096B         | 指定每次分配Socket Direct Buffer的大小，默认是4096个字节。这个属性也影响buffer pool的长度。                                                                                                                                                                   |</span><br><span class="line">| processorBufferPool           | 2097152B      | 指定bufferPool计算 比例值。由于每次执行NIO读、写操作都需要使用到buffer，系统初始化的时候会建立一定长度的buffer池来加快读、写的效率，减少建立buffer的时间                                                                                                      |</span><br><span class="line">| processorBufferLocalPercent   | 100           | 就是用来控制分配这个pool的大小用的，但其也并不是一个准确的值，也是一个比例值。这个属性默认值为100。线程缓存百分比 = bufferLocalPercent / processors属性。                                                                                                     |</span><br><span class="line">| processorExecutor             | 24            | 主要用于指定NIOProcessor上共享的businessExecutor固定线程池大小。mycat在需要处理一些异步逻辑的时候会把任务提交到这个线程池中。新版本中这个连接池的使用频率不是很大了，可以设置一个较小的值。                                                                   |</span><br><span class="line">| sequnceHandlerType            | 本地文件方式  | 指定使用Mycat全局序列的类型。                                                                                                                                                                                                                                 |</span><br><span class="line">| Mysql_packetHeaderSize        | 4B            | 指定Mysql协议中的报文头长度。默认4                                                                                                                                                                                                                            |</span><br><span class="line">| Mysql_maxPacketSize           | 16M           | 指定Mysql协议可以携带的数据最大长度。默认16M                                                                                                                                                                                                                  |</span><br><span class="line">| Mysql_idleTimeout             | 30分钟        | 指定连接的空闲超时时间。某连接在发起空闲检查下，发现距离上次使用超过了空闲时间，那么这个连接会被回收，就是被直接的关闭掉。默认30分钟                                                                                                                          |</span><br><span class="line">| Mysql_charset                 | utf8          | 连接的初始化字符集。默认为utf8                                                                                                                                                                                                                                |</span><br><span class="line">| Mysql_txIsolation             | REPEATED_READ | 前端连接的初始化事务隔离级别，只在初始化的时候使用，后续会根据客户端传递过来的属性对后端数据库连接进行同步。默认为REPEATED_READ                                                                                                                               |</span><br><span class="line">| Mysql_sqlExecuteTimeout       | 300秒         | SQL执行超时的时间，Mycat会检查连接上最后一次执行SQL的时间，若超过这个时间则会直接关闭这连接。默认时间为300秒                                                                                                                                                  |</span><br><span class="line">| Mycat_processorCheckPeriod    | 1秒           | 清理NIOProcessor上前后端空闲、超时和关闭连接的间隔时间。默认是1秒                                                                                                                                                                                             |</span><br><span class="line">| Mycat_dataNodeIdleCheckPeriod | 300秒         | 对后端连接进行空闲、超时检查的时间间隔，默认是300秒                                                                                                                                                                                                           |</span><br><span class="line">| Mycat_dataNodeHeartbeatPeriod | 10秒          | 对后端所有读、写库发起心跳的间隔时间，默认是10秒                                                                                                                                                                                                              |</span><br><span class="line">| Mycat_bindIp                  | 0.0.0.0       | mycat服务监听的IP地址，默认值为0.0.0.0                                                                                                                                                                                                                        |</span><br><span class="line">| Mycat_serverPort              | 8066          | mycat的使用端口，默认值为8066                                                                                                                                                                                                                                 |</span><br><span class="line">| Mycat_managerPort             | 9066          | mycat的管理端口，默认值为9066                                                                                                                                                                                                                                 |</span><br><span class="line">+-------------------------------+---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/512/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2018-12-20 22:23:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/java/" title="java">
+                        #java
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/mycat/" title="mycat">
+                        #mycat
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/52778/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E6%97%A5%E5%BF%97%E5%B9%B3%E5%8F%B0%E7%9B%91%E6%8E%A7"><span class="toc-text">1、日志平台监控</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9B%91%E6%8E%A7"><span class="toc-text">2、管理系统监控</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%89%80%E6%9C%89%E7%9A%84%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7"><span class="toc-text">查看所有的命令行工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E6%83%85%E5%86%B5"><span class="toc-text">查看系统运行情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8BNIO-Reactor%E4%BF%A1%E6%81%AF"><span class="toc-text">查看NIO Reactor信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-text">查看线程池</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%89%8D%E7%AB%AF%E8%BF%9E%E6%8E%A5%E6%B1%A0%E4%BF%A1%E6%81%AF"><span class="toc-text">查看前端连接池信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%90%8E%E5%8F%B0%E8%BF%9E%E6%8E%A5%E6%B1%A0%E4%BF%A1%E6%81%AF"><span class="toc-text">查看后台连接池信息</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%BF%83%E8%B7%B3%E4%BF%A1%E6%81%AF"><span class="toc-text">查看心跳信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E5%8F%82%E6%95%B0"><span class="toc-text">查看系统参数</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

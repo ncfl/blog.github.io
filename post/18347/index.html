@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      GraphQL-GO（2）gqlgen简介 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">GraphQL-GO（2）gqlgen简介</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2021-08-11 23:00:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/go/" title="go">
+                    #go
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/graphql/" title="graphql">
+                    #graphql
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a><strong>概述</strong></h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://user-images.githubusercontent.com/46195831/89802919-0bb8ef00-db2a-11ea-8ba4-88e7a58b2fd2.png" alt="图片替换文本" width="300" height="300" align="bottom"/>
+
+<p><code>gqlgen</code>是一个基于schema文件构建的GO语言<code>GraphQL</code>服务器<br></br><br>虽然<code>gqlgen</code>的star不是最多的，但是相较于<code>graphql-go</code>、<code>graph-gophers/graphql-go</code>，个人觉得<code>gqlgen</code>是提供功能最全的，还支持文件的<a target="_blank" rel="noopener external nofollow noreferrer" href="https://gqlgen.com/reference/file-upload/">上传</a>等功能(虽然感觉这东西还不如用rest方便)。目前从我周边了解到，很多项目都从<code>graphql-go</code>转移到使用<code>gqlgen</code></p>
+</br>
+git仓库：</br>
+[https://github.com/99designs/gqlgen](https://github.com/99designs/gqlgen)</br>
+文档：</br>
+[https://pkg.go.dev/github.com/99designs/gqlgen](https://pkg.go.dev/github.com/99designs/gqlgen) </br>
+[https://gqlgen.com/](https://gqlgen.com/)</br>
+入门示例：</br>
+[https://gqlgen.com/getting-started/](https://gqlgen.com/getting-started/)</br>
+本文相关代码：</br>
+[https://github.com/ncfl/graphql](https://github.com/ncfl/graphql)
+
+<h1 id="简单示例"><a href="#简单示例" class="headerlink" title="简单示例"></a><strong>简单示例</strong></h1><p>1、下载安装<code>gqlgen</code>工具</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/99designs/gqlgen</span><br></pre></td></tr></table></figure>
+<p>2、初始化项目</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 首先项目需要是一个go mod管理的的项目</span><br><span class="line">go mod init graphql</span><br><span class="line"># 初始化为gqlgen项目，下面命令二选一</span><br><span class="line"># init对应的源码为https://github.com/99designs/gqlgen/blob/master/cmd/init.go，感兴趣的同学可以自行去看看</span><br><span class="line">gqlgen init</span><br><span class="line">go run github.com/99designs/gqlgen init</span><br></pre></td></tr></table></figure>
+<p>3、看下目录结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── gqlgen.yml               - gql配置文件，用以自动生成代码</span><br><span class="line">├── graph</span><br><span class="line">│   ├── generated            - 自动生成的运行代码</span><br><span class="line">│   │   └── generated.go</span><br><span class="line">│   ├── model                - 自动生成的结构体</span><br><span class="line">│   │   └── models_gen.go</span><br><span class="line">│   ├── resolver.go          - 解析类，里面其实就是一个结构体</span><br><span class="line">│   ├── schema.graphqls      - schema.graphqls</span><br><span class="line">│   └── schema.resolvers.go  - 解析类文件，也是主要的开发地方</span><br><span class="line">└── server.go                - 可执行文件</span><br></pre></td></tr></table></figure>
+<p>4、按照提示运行一下<code>server.go</code>，访问一下<code>http://localhost:8080/</code>看一下效果如下，当然暂时还不能运行。<br>下面的这个界面是用基于<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/graphql/graphql-playground">https://github.com/graphql/graphql-playground</a>这个生成的。有空可以了解一下。<br><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/20210813201202.png"><br>5、修改一下文件，让<code>GraphQL</code>的服务器可以运行。修改如下，然后再运行一下。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改`schema.resolvers.go`文件如下</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 本地缓存</span></span><br><span class="line"><span class="keyword">var</span> todos []*model.Todo</span><br><span class="line"></span><br><span class="line"><span class="comment">// CreateTodo 添加数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *mutationResolver)</span></span> CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, <span class="type">error</span>) &#123;</span><br><span class="line">	todo := &amp;model.Todo&#123;</span><br><span class="line">		Text: input.Text,</span><br><span class="line">		ID:   fmt.Sprintf(<span class="string">&quot;T%d&quot;</span>, rand.Int()),</span><br><span class="line">		User: &amp;model.User&#123;ID: input.UserID, Name: <span class="string">&quot;user &quot;</span> + input.UserID&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	todos = <span class="built_in">append</span>(todos, todo)</span><br><span class="line">	<span class="keyword">return</span> todo, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Todos 查询</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *queryResolver)</span></span> Todos(ctx context.Context) ([]*model.Todo, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> todos, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>6、在界面上输入如下，先运行<code>mutation</code>添加数据，在运行<code>query</code>查询数据</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Write your query or mutation here</span></span><br><span class="line"><span class="attr">mutation</span> <span class="string">createTodo &#123;</span></span><br><span class="line">  <span class="attr">createTodo(input</span>:<span class="string">&#123;text:&quot;todo&quot;, userId:&quot;1&quot;&#125;) &#123;</span></span><br><span class="line">    <span class="attr">user</span> <span class="string">&#123;</span></span><br><span class="line">      <span class="attr">id</span></span><br><span class="line">    <span class="attr">&#125;</span></span><br><span class="line">    <span class="attr">text</span></span><br><span class="line">    <span class="attr">done</span></span><br><span class="line">  <span class="attr">&#125;</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">query</span> <span class="string">findTodos &#123;</span></span><br><span class="line">    <span class="attr">todos</span> <span class="string">&#123;</span></span><br><span class="line">      <span class="attr">text</span></span><br><span class="line">      <span class="attr">done</span></span><br><span class="line">      <span class="attr">user</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="attr">name</span></span><br><span class="line">      <span class="attr">&#125;</span></span><br><span class="line">    <span class="attr">&#125;</span></span><br><span class="line"><span class="attr">&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a><strong>配置文件</strong></h1><p>配置文件详解可以看<a target="_blank" rel="noopener external nofollow noreferrer" href="https://gqlgen.com/config/">https://gqlgen.com/config/</a><br>配置文件的解析类为<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/99designs/gqlgen/blob/master/codegen/config/config.go">https://github.com/99designs/gqlgen/blob/master/codegen/config/config.go</a>，感兴趣的同学可以自行查阅<br></be><br>下面讲解以上文init生成的默认的<code>qlgen.yml</code>文件为例</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 扫描的schema文件地址和文件格式</span></span><br><span class="line"><span class="attr">schema:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">graph/*.graphqls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># gqlgen服务器代码自动生成的目录和文件名</span></span><br><span class="line"><span class="attr">exec:</span></span><br><span class="line">  <span class="attr">filename:</span> <span class="string">graph/generated/generated.go</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">generated</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 如果需要用到Apollo federation指令则需要配置</span></span><br><span class="line"><span class="comment"># 关于Apollo federation指令可以查阅https://dgraph.io/docs/master/graphql/federation/</span></span><br><span class="line"><span class="comment"># 打开之后schema文件中会增加如下内容：</span></span><br><span class="line"><span class="comment"># directive @external on FIELD_DEFINITION</span></span><br><span class="line"><span class="comment"># directive @requires(fields: _FieldSet!) on FIELD_DEFINITION</span></span><br><span class="line"><span class="comment"># directive @provides(fields: _FieldSet!) on FIELD_DEFINITION</span></span><br><span class="line"><span class="comment"># directive @key(fields: _FieldSet!) on OBJECT | INTERFACE</span></span><br><span class="line"><span class="comment"># directive @extends on OBJECT</span></span><br><span class="line"><span class="comment"># scalar _Any</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># federation:</span></span><br><span class="line"><span class="comment">#   filename: graph/generated/federation.go</span></span><br><span class="line"><span class="comment">#   package: generated</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># graphql结构体代码自动生成的目录和文件名</span></span><br><span class="line"><span class="attr">model:</span></span><br><span class="line">  <span class="attr">filename:</span> <span class="string">graph/model/models_gen.go</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">model</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 解析文件代码自动生成的的目录和文件名</span></span><br><span class="line"><span class="attr">resolver:</span></span><br><span class="line">  <span class="attr">layout:</span> <span class="string">follow-schema</span></span><br><span class="line">  <span class="attr">dir:</span> <span class="string">graph</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">graph</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 当扫描autobind时，发现同一个结构体名出现多个的时候，则按照配置的tag名字加载对应的结构体</span></span><br><span class="line"><span class="comment"># 但是这里验证来看，同一个结构体名出线多个的时候，只会加载autobind配置的第一个路径，不会按照tag匹配。不建议使用</span></span><br><span class="line"><span class="comment"># 这里不太确定，如若有误，感谢指正</span></span><br><span class="line"><span class="comment"># struct_tag: json</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 数组类型，是否适用为指针类型，即是否需要将 []*thing 替换为 []thing</span></span><br><span class="line"><span class="comment"># omit_slice_element_pointers: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 是否跳过验证阶段，代码自动生成之后，会验证自动生成的代码是否有误，默认需要验证</span></span><br><span class="line"><span class="comment"># skip_validation: true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可选配置</span></span><br><span class="line"><span class="comment"># 扫面下面路径，如果发现和需要生成的结构体名字相同，则使用扫描到的结构体，否则生成对应结构体</span></span><br><span class="line"><span class="attr">autobind:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;graphql/gqlgen/graph/model&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># GraphQL声明的变量与系统的结构体的映射关系</span></span><br><span class="line"><span class="comment"># 可以根据需要配置字段是否需要解析</span></span><br><span class="line"><span class="comment"># 这里每个字段的resolver: true的时候，都会在自动生成的resolve中生成一个方法，如果请求字段中包含该字段，则会进入到对应的方法</span></span><br><span class="line"><span class="attr">models:</span></span><br><span class="line">  <span class="attr">ID:</span></span><br><span class="line">    <span class="attr">model:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.ID</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int64</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int32</span></span><br><span class="line">  <span class="attr">Int:</span></span><br><span class="line">    <span class="attr">model:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int64</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int32</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="starwars星球大战"><a href="#starwars星球大战" class="headerlink" title="starwars星球大战"></a><strong>starwars星球大战</strong></h1><p>之前在<a target="_blank" rel="noopener external nofollow noreferrer" href="https://graphql.bootcss.com/learn/">https://graphql.bootcss.com/learn/</a>学习的时候都是根据starwars作为示例，这里也基于gqlgen生成starwars服务<br></br><br><code>gqlgen</code>自身也生成了starwars的示例：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/99designs/gqlgen/tree/master/example/starwars">https://github.com/99designs/gqlgen/tree/master/example/starwars</a><br>但是个人感觉不适合入门，内部自定义一些结构体，导致理解上有点难度，我这边自己也是实现了一套个人觉得更好理解的，只变更数据层和逻辑层，不涉及<code>model</code>和<code>generate</code>的改动。<br></br><br>代码如下：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/graphql/tree/main/gqlgen-starwar">https://github.com/ncfl/graphql/tree/main/gqlgen-starwar</a></p>
+</br>
+## 1、自动生成代码
+在对应目录下添加`gqlgen.yml`和`schema.graphql`文件，同目录下运行如下命令之一即可生成代码
+</br>
+> gqlgen 
+> go run github.com/99designs/gqlgen 
+
+<p><code>gqlgen.yml</code>如下，也可见<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/gqlgen.yml">https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/gqlgen.yml</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">schema:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">./*.graphql</span></span><br><span class="line"></span><br><span class="line"><span class="attr">exec:</span></span><br><span class="line">  <span class="attr">filename:</span> <span class="string">generated/generated.go</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">generated</span></span><br><span class="line"></span><br><span class="line"><span class="attr">model:</span></span><br><span class="line">  <span class="attr">filename:</span> <span class="string">model/model.go</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">model</span></span><br><span class="line"></span><br><span class="line"><span class="attr">resolver:</span></span><br><span class="line">  <span class="attr">layout:</span> <span class="string">follow-schema</span></span><br><span class="line">  <span class="attr">dir:</span> <span class="string">resolve</span></span><br><span class="line">  <span class="attr">package:</span> <span class="string">resolve</span></span><br><span class="line"></span><br><span class="line"><span class="attr">autobind:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;graphql/gqlgen-starwar/model&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">models:</span></span><br><span class="line">  <span class="attr">ID:</span></span><br><span class="line">    <span class="attr">model:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.ID</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int64</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int32</span></span><br><span class="line">  <span class="attr">Int:</span></span><br><span class="line">    <span class="attr">model:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int64</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">github.com/99designs/gqlgen/graphql.Int32</span></span><br><span class="line">  <span class="attr">Droid:</span></span><br><span class="line">    <span class="attr">fields:</span></span><br><span class="line">      <span class="attr">friendsConnection:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">friends:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">Human:</span></span><br><span class="line">    <span class="attr">fields:</span></span><br><span class="line">      <span class="attr">friendsConnection:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">friends:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">height:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">FriendsConnection:</span></span><br><span class="line">    <span class="attr">fields:</span></span><br><span class="line">      <span class="attr">friends:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">edges:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">Starship:</span></span><br><span class="line">    <span class="attr">fields:</span></span><br><span class="line">      <span class="attr">length:</span></span><br><span class="line">        <span class="attr">resolver:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p><code>schema.graphql</code>如下，也可见：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/schema.graphql">https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/schema.graphql</a></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># The query type, represents all of the entry points into our object graph</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Query &#123;</span></span><br><span class="line">    <span class="attr">hero(episode</span>: <span class="string">Episode = NEWHOPE): Character</span></span><br><span class="line">    <span class="attr">reviews(episode</span>: <span class="string">Episode!, since: Time): [Review!]!</span></span><br><span class="line">    <span class="attr">search(text</span>: <span class="string">String!): [SearchResult!]!</span></span><br><span class="line">    <span class="attr">character(id</span>: <span class="string">ID!): Character</span></span><br><span class="line">    <span class="attr">droid(id</span>: <span class="string">ID!): Droid</span></span><br><span class="line">    <span class="attr">human(id</span>: <span class="string">ID!): Human</span></span><br><span class="line">    <span class="attr">starship(id</span>: <span class="string">ID!): Starship</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># The mutation type, represents all updates we can make to our data</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Mutation &#123;</span></span><br><span class="line">    <span class="attr">createReview(episode</span>: <span class="string">Episode!, review: ReviewInput!): Review</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># A humanoid creature from the Star Wars universe</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Human implements Character &#123;</span></span><br><span class="line"><span class="comment">    # The ID of the human</span></span><br><span class="line">    <span class="attr">id</span>: <span class="string">ID!</span></span><br><span class="line"><span class="comment">    # What this human calls themselves</span></span><br><span class="line">    <span class="attr">name</span>: <span class="string">String!</span></span><br><span class="line"><span class="comment">    # Height in the preferred unit, default is meters</span></span><br><span class="line">    <span class="attr">height(unit</span>: <span class="string">LengthUnit = METER): Float!</span></span><br><span class="line"><span class="comment">    # Mass in kilograms, or null if unknown</span></span><br><span class="line">    <span class="attr">mass</span>: <span class="string">Float</span></span><br><span class="line"><span class="comment">    # This human&#x27;s friends, or an empty list if they have none</span></span><br><span class="line">    <span class="attr">friends</span>: <span class="string">[Character!]</span></span><br><span class="line"><span class="comment">    # The friends of the human exposed as a connection with edges</span></span><br><span class="line">    <span class="attr">friendsConnection(first</span>: <span class="string">Int, after: ID): FriendsConnection!</span></span><br><span class="line"><span class="comment">    # The movies this human appears in</span></span><br><span class="line">    <span class="attr">appearsIn</span>: <span class="string">[Episode!]!</span></span><br><span class="line"><span class="comment">    # A list of starships this person has piloted, or an empty list if none</span></span><br><span class="line">    <span class="attr">starships</span>: <span class="string">[Starship!]</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># An autonomous mechanical character in the Star Wars universe</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Droid implements Character &#123;</span></span><br><span class="line"><span class="comment">    # The ID of the droid</span></span><br><span class="line">    <span class="attr">id</span>: <span class="string">ID!</span></span><br><span class="line"><span class="comment">    # What others call this droid</span></span><br><span class="line">    <span class="attr">name</span>: <span class="string">String!</span></span><br><span class="line"><span class="comment">    # This droid&#x27;s friends, or an empty list if they have none</span></span><br><span class="line">    <span class="attr">friends</span>: <span class="string">[Character!]</span></span><br><span class="line"><span class="comment">    # The friends of the droid exposed as a connection with edges</span></span><br><span class="line">    <span class="attr">friendsConnection(first</span>: <span class="string">Int, after: ID): FriendsConnection!</span></span><br><span class="line"><span class="comment">    # The movies this droid appears in</span></span><br><span class="line">    <span class="attr">appearsIn</span>: <span class="string">[Episode!]!</span></span><br><span class="line"><span class="comment">    # This droid&#x27;s primary function</span></span><br><span class="line">    <span class="attr">primaryFunction</span>: <span class="string">String</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># A connection object for a character&#x27;s friends</span></span><br><span class="line"><span class="attr">type</span> <span class="string">FriendsConnection &#123;</span></span><br><span class="line"><span class="comment">    # The total number of friends</span></span><br><span class="line">    <span class="attr">totalCount</span>: <span class="string">Int!</span></span><br><span class="line"><span class="comment">    # The edges for each of the character&#x27;s friends.</span></span><br><span class="line">    <span class="attr">edges</span>: <span class="string">[FriendsEdge!]</span></span><br><span class="line"><span class="comment">    # A list of the friends, as a convenience when edges are not needed.</span></span><br><span class="line">    <span class="attr">friends</span>: <span class="string">[Character!]</span></span><br><span class="line"><span class="comment">    # Information for paginating this connection</span></span><br><span class="line">    <span class="attr">pageInfo</span>: <span class="string">PageInfo!</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># An edge object for a character&#x27;s friends</span></span><br><span class="line"><span class="attr">type</span> <span class="string">FriendsEdge &#123;</span></span><br><span class="line"><span class="comment">    # A cursor used for pagination</span></span><br><span class="line">    <span class="attr">cursor</span>: <span class="string">ID!</span></span><br><span class="line"><span class="comment">    # The character represented by this friendship edge</span></span><br><span class="line">    <span class="attr">node</span>: <span class="string">Character</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># Information for paginating this connection</span></span><br><span class="line"><span class="attr">type</span> <span class="string">PageInfo &#123;</span></span><br><span class="line">    <span class="attr">startCursor</span>: <span class="string">ID!</span></span><br><span class="line">    <span class="attr">endCursor</span>: <span class="string">ID!</span></span><br><span class="line">    <span class="attr">hasNextPage</span>: <span class="string">Boolean!</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># Represents a review for a movie</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Review &#123;</span></span><br><span class="line"><span class="comment">    # The number of stars this review gave, 1-5</span></span><br><span class="line">    <span class="attr">stars</span>: <span class="string">Int!</span></span><br><span class="line"><span class="comment">    # Comment about the movie</span></span><br><span class="line">    <span class="attr">commentary</span>: <span class="string">String</span></span><br><span class="line"><span class="comment">    # when the review was posted</span></span><br><span class="line">    <span class="attr">time</span>: <span class="string">Time</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># The input object sent when someone is creating a new review</span></span><br><span class="line"><span class="attr">input</span> <span class="string">ReviewInput &#123;</span></span><br><span class="line"><span class="comment">    # 0-5 stars</span></span><br><span class="line">    <span class="attr">stars</span>: <span class="string">Int!</span></span><br><span class="line"><span class="comment">    # Comment about the movie, optional</span></span><br><span class="line">    <span class="attr">commentary</span>: <span class="string">String</span></span><br><span class="line"><span class="comment">    # when the review was posted</span></span><br><span class="line">    <span class="attr">time</span>: <span class="string">Time</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="attr">type</span> <span class="string">Starship &#123;</span></span><br><span class="line"><span class="comment">    # The ID of the starship</span></span><br><span class="line">    <span class="attr">id</span>: <span class="string">ID!</span></span><br><span class="line"><span class="comment">    # The name of the starship</span></span><br><span class="line">    <span class="attr">name</span>: <span class="string">String!</span></span><br><span class="line"><span class="comment">    # Length of the starship, along the longest axis</span></span><br><span class="line">    <span class="attr">length(unit</span>: <span class="string">LengthUnit = METER): Float!</span></span><br><span class="line"><span class="comment">    # coordinates tracking this ship</span></span><br><span class="line">    <span class="attr">history</span>: <span class="string">[[Int!]!]!</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"># The episodes in the Star Wars trilogy</span></span><br><span class="line"><span class="attr">enum</span> <span class="string">Episode &#123;</span></span><br><span class="line"><span class="comment">    # Star Wars Episode IV: A New Hope, released in 1977.</span></span><br><span class="line">    <span class="attr">NEWHOPE</span></span><br><span class="line"><span class="comment">    # Star Wars Episode V: The Empire Strikes Back, released in 1980.</span></span><br><span class="line">    <span class="attr">EMPIRE</span></span><br><span class="line"><span class="comment">    # Star Wars Episode VI: Return of the Jedi, released in 1983.</span></span><br><span class="line">    <span class="attr">JEDI</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># A character from the Star Wars universe</span></span><br><span class="line"><span class="attr">interface</span> <span class="string">Character &#123;</span></span><br><span class="line"><span class="comment">    # The ID of the character</span></span><br><span class="line">    <span class="attr">id</span>: <span class="string">ID!</span></span><br><span class="line"><span class="comment">    # The name of the character</span></span><br><span class="line">    <span class="attr">name</span>: <span class="string">String!</span></span><br><span class="line"><span class="comment">    # The friends of the character, or an empty list if they have none</span></span><br><span class="line">    <span class="attr">friends</span>: <span class="string">[Character!]</span></span><br><span class="line"><span class="comment">    # The friends of the character exposed as a connection with edges</span></span><br><span class="line">    <span class="attr">friendsConnection(first</span>: <span class="string">Int, after: ID): FriendsConnection!</span></span><br><span class="line"><span class="comment">    # The movies this character appears in</span></span><br><span class="line">    <span class="attr">appearsIn</span>: <span class="string">[Episode!]!</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="comment"># Units of height</span></span><br><span class="line"><span class="attr">enum</span> <span class="string">LengthUnit &#123;</span></span><br><span class="line"><span class="comment">    # The standard unit around the world</span></span><br><span class="line">    <span class="attr">METER</span></span><br><span class="line"><span class="comment">    # Primarily used in the United States</span></span><br><span class="line">    <span class="attr">FOOT</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"><span class="attr">union</span> <span class="string">SearchResult = Human | Droid | Starship</span></span><br><span class="line"><span class="attr">scalar</span> <span class="string">Time</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2、添加可执行方法"><a href="#2、添加可执行方法" class="headerlink" title="2、添加可执行方法"></a>2、添加可执行方法</h2><p>首先添加基础数据，如果是正经服务，这些数据应该源自数据库或者其他接口，如果请求量较大，建议拉取的时候本地缓存。<br>在<code>resolver.go</code>中添加内容，详情可见:<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/resolve/resolver.go">https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/resolve/resolver.go</a></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> resolve</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;graphql/gqlgen-starwar/generated&quot;</span></span><br><span class="line">	<span class="string">&quot;graphql/gqlgen-starwar/model&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/golang/protobuf/proto&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// This file will not be regenerated automatically.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// It serves as dependency injection for your app, add any dependencies you require here.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Resolver <span class="keyword">struct</span> &#123;</span><br><span class="line">	humans    <span class="keyword">map</span>[<span class="type">string</span>]model.Human</span><br><span class="line">	droid     <span class="keyword">map</span>[<span class="type">string</span>]model.Droid</span><br><span class="line">	starships <span class="keyword">map</span>[<span class="type">string</span>]model.Starship</span><br><span class="line">	reviews   <span class="keyword">map</span>[model.Episode][]*model.Review</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewResolver</span><span class="params">()</span></span> generated.Config &#123;</span><br><span class="line">	r := Resolver&#123;&#125;</span><br><span class="line">	r.humans = <span class="keyword">map</span>[<span class="type">string</span>]model.Human&#123;</span><br><span class="line">		<span class="string">&quot;1000&quot;</span>: &#123;</span><br><span class="line">			ID:        <span class="string">&quot;1000&quot;</span>,</span><br><span class="line">			Name:      <span class="string">&quot;Luke Skywalker&quot;</span>,</span><br><span class="line">			Friends:   []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1002&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1003&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2000&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2001&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn: []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			Height:    <span class="number">1.72</span>,</span><br><span class="line">			Mass:      proto.Float64(<span class="number">77</span>),</span><br><span class="line">			Starships: []*model.Starship&#123;&#123;ID: <span class="string">&quot;3001&quot;</span>&#125;, &#123;ID: <span class="string">&quot;3003&quot;</span>&#125;&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;1001&quot;</span>: &#123;</span><br><span class="line">			ID:        <span class="string">&quot;1001&quot;</span>,</span><br><span class="line">			Name:      <span class="string">&quot;Darth Vader&quot;</span>,</span><br><span class="line">			Friends:   []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1004&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn: []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			Height:    <span class="number">2.02</span>,</span><br><span class="line">			Mass:      proto.Float64(<span class="number">136</span>),</span><br><span class="line">			Starships: []*model.Starship&#123;&#123;ID: <span class="string">&quot;3002&quot;</span>&#125;&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;1002&quot;</span>: &#123;</span><br><span class="line">			ID:        <span class="string">&quot;1002&quot;</span>,</span><br><span class="line">			Name:      <span class="string">&quot;Han Solo&quot;</span>,</span><br><span class="line">			Friends:   []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1000&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1003&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2001&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn: []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			Height:    <span class="number">1.8</span>,</span><br><span class="line">			Mass:      proto.Float64(<span class="number">80</span>),</span><br><span class="line">			Starships: []*model.Starship&#123;&#123;ID: <span class="string">&quot;3000&quot;</span>&#125;, &#123;ID: <span class="string">&quot;3003&quot;</span>&#125;&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;1003&quot;</span>: &#123;</span><br><span class="line">			ID:        <span class="string">&quot;1003&quot;</span>,</span><br><span class="line">			Name:      <span class="string">&quot;Leia Organa&quot;</span>,</span><br><span class="line">			Friends:   []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1000&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1002&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2000&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2001&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn: []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			Height:    <span class="number">1.5</span>,</span><br><span class="line">			Mass:      proto.Float64(<span class="number">49</span>),</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;1004&quot;</span>: &#123;</span><br><span class="line">			ID:        <span class="string">&quot;1004&quot;</span>,</span><br><span class="line">			Name:      <span class="string">&quot;Wilhuff Tarkin&quot;</span>,</span><br><span class="line">			Friends:   []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1001&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn: []model.Episode&#123;model.EpisodeNewhope&#125;,</span><br><span class="line">			Height:    <span class="number">1.8</span>,</span><br><span class="line">			Mass:      proto.Float64(<span class="number">0</span>),</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	r.droid = <span class="keyword">map</span>[<span class="type">string</span>]model.Droid&#123;</span><br><span class="line">		<span class="string">&quot;2000&quot;</span>: &#123;</span><br><span class="line">			ID:              <span class="string">&quot;2000&quot;</span>,</span><br><span class="line">			Name:            <span class="string">&quot;C-3PO&quot;</span>,</span><br><span class="line">			Friends:         []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1000&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1002&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1003&quot;</span>&#125;, model.Droid&#123;ID: <span class="string">&quot;2001&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn:       []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			PrimaryFunction: proto.String(<span class="string">&quot;Protocol&quot;</span>),</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;2001&quot;</span>: &#123;</span><br><span class="line">			ID:              <span class="string">&quot;2001&quot;</span>,</span><br><span class="line">			Name:            <span class="string">&quot;R2-D2&quot;</span>,</span><br><span class="line">			Friends:         []model.Character&#123;model.Human&#123;ID: <span class="string">&quot;1000&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1002&quot;</span>&#125;, model.Human&#123;ID: <span class="string">&quot;1003&quot;</span>&#125;&#125;,</span><br><span class="line">			AppearsIn:       []model.Episode&#123;model.EpisodeNewhope, model.EpisodeEmpire, model.EpisodeJedi&#125;,</span><br><span class="line">			PrimaryFunction: proto.String(<span class="string">&quot;Astromech&quot;</span>),</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	r.starships = <span class="keyword">map</span>[<span class="type">string</span>]model.Starship&#123;</span><br><span class="line">		<span class="string">&quot;3000&quot;</span>: &#123;</span><br><span class="line">			ID:   <span class="string">&quot;3000&quot;</span>,</span><br><span class="line">			Name: <span class="string">&quot;Millennium Falcon&quot;</span>,</span><br><span class="line">			History: [][]<span class="type">int</span>&#123;</span><br><span class="line">				&#123;<span class="number">1</span>, <span class="number">2</span>&#125;,</span><br><span class="line">				&#123;<span class="number">4</span>, <span class="number">5</span>&#125;,</span><br><span class="line">				&#123;<span class="number">1</span>, <span class="number">2</span>&#125;,</span><br><span class="line">				&#123;<span class="number">3</span>, <span class="number">2</span>&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">			Length: <span class="number">34.37</span>,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;3001&quot;</span>: &#123;</span><br><span class="line">			ID:   <span class="string">&quot;3001&quot;</span>,</span><br><span class="line">			Name: <span class="string">&quot;X-Wing&quot;</span>,</span><br><span class="line">			History: [][]<span class="type">int</span>&#123;</span><br><span class="line">				&#123;<span class="number">6</span>, <span class="number">4</span>&#125;,</span><br><span class="line">				&#123;<span class="number">3</span>, <span class="number">2</span>&#125;,</span><br><span class="line">				&#123;<span class="number">2</span>, <span class="number">3</span>&#125;,</span><br><span class="line">				&#123;<span class="number">5</span>, <span class="number">1</span>&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">			Length: <span class="number">12.5</span>,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;3002&quot;</span>: &#123;</span><br><span class="line">			ID:   <span class="string">&quot;3002&quot;</span>,</span><br><span class="line">			Name: <span class="string">&quot;TIE Advanced x1&quot;</span>,</span><br><span class="line">			History: [][]<span class="type">int</span>&#123;</span><br><span class="line">				&#123;<span class="number">3</span>, <span class="number">2</span>&#125;,</span><br><span class="line">				&#123;<span class="number">7</span>, <span class="number">2</span>&#125;,</span><br><span class="line">				&#123;<span class="number">6</span>, <span class="number">4</span>&#125;,</span><br><span class="line">				&#123;<span class="number">3</span>, <span class="number">2</span>&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">			Length: <span class="number">9.2</span>,</span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="string">&quot;3003&quot;</span>: &#123;</span><br><span class="line">			ID:   <span class="string">&quot;3003&quot;</span>,</span><br><span class="line">			Name: <span class="string">&quot;Imperial shuttle&quot;</span>,</span><br><span class="line">			History: [][]<span class="type">int</span>&#123;</span><br><span class="line">				&#123;<span class="number">1</span>, <span class="number">7</span>&#125;,</span><br><span class="line">				&#123;<span class="number">3</span>, <span class="number">5</span>&#125;,</span><br><span class="line">				&#123;<span class="number">5</span>, <span class="number">3</span>&#125;,</span><br><span class="line">				&#123;<span class="number">7</span>, <span class="number">1</span>&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">			Length: <span class="number">20</span>,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	r.reviews = <span class="keyword">map</span>[model.Episode][]*model.Review&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> generated.Config&#123;</span><br><span class="line">		Resolvers: &amp;r,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>构建gqlgen服务器，添加可执行<code>main</code>方法，如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;graphql/gqlgen-starwar/generated&quot;</span></span><br><span class="line">	<span class="string">&quot;graphql/gqlgen-starwar/resolve&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="string">&quot;github.com/99designs/gqlgen/graphql/handler&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/99designs/gqlgen/graphql/playground&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> defaultPort = <span class="string">&quot;8080&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	srv := handler.NewDefaultServer(generated.NewExecutableSchema(resolve.NewResolver()))</span><br><span class="line"></span><br><span class="line">	http.Handle(<span class="string">&quot;/&quot;</span>, playground.Handler(<span class="string">&quot;GraphQL playground&quot;</span>, <span class="string">&quot;/query&quot;</span>))</span><br><span class="line">	http.Handle(<span class="string">&quot;/query&quot;</span>, srv)</span><br><span class="line"></span><br><span class="line">	log.Printf(<span class="string">&quot;connect to http://localhost:%s/ for GraphQL playground&quot;</span>, defaultPort)</span><br><span class="line">	log.Fatal(http.ListenAndServe(<span class="string">&quot;:&quot;</span>+defaultPort, <span class="literal">nil</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>至此运行上面的<code>main</code>方法，就可以访问<code>localhost:8080</code>，此时界面上对应的docs和schema即是完整的用例，只不过内部逻辑暂未实现而已。</p>
+<h2 id="3、完成schema-resolvers-go逻辑"><a href="#3、完成schema-resolvers-go逻辑" class="headerlink" title="3、完成schema.resolvers.go逻辑"></a>3、完成<code>schema.resolvers.go</code>逻辑</h2><p>这里以最简单的<code>Human</code>，<code>Character</code>,<code>Search</code>为例，如下，逻辑也很简单，就是上文的数据中根据参数返回对应的数据而已<br></br><br>完整的代码可见<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/resolve/schema.resolvers.go">https://github.com/ncfl/graphql/blob/main/gqlgen-starwar/resolve/schema.resolvers.go</a><br></br></p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *queryResolver)</span></span> Search(ctx context.Context, text <span class="type">string</span>) ([]model.SearchResult, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">var</span> l []model.SearchResult</span><br><span class="line">	<span class="keyword">for</span> _, h := <span class="keyword">range</span> r.humans &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Contains(h.Name, text) &#123;</span><br><span class="line">			l = <span class="built_in">append</span>(l, h)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, d := <span class="keyword">range</span> r.droid &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Contains(d.Name, text) &#123;</span><br><span class="line">			l = <span class="built_in">append</span>(l, d)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, s := <span class="keyword">range</span> r.starships &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Contains(s.Name, text) &#123;</span><br><span class="line">			l = <span class="built_in">append</span>(l, s)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> l, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *queryResolver)</span></span> Character(ctx context.Context, id <span class="type">string</span>) (model.Character, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> h, ok := r.humans[id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;h, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> d, ok := r.droid[id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;d, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *queryResolver)</span></span> Droid(ctx context.Context, id <span class="type">string</span>) (*model.Droid, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> d, ok := r.droid[id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;d, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *queryResolver)</span></span> Human(ctx context.Context, id <span class="type">string</span>) (*model.Human, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> h, ok := r.humans[id]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> &amp;h, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4、验证"><a href="#4、验证" class="headerlink" title="4、验证"></a>4、验证</h2><p>待所有逻辑全部实现完成之后，即可将<a target="_blank" rel="noopener external nofollow noreferrer" href="https://graphql.bootcss.com/learn/">https://graphql.bootcss.com/learn/</a>中的示例在自己的搭建的服务器上进行验证，如下：<br><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/20210815142218.png"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h1><ul>
+<li><code>gqlgen</code>是基于schema文件自动生成的代码，类似于模板模式开发</li>
+<li>因为上面导致代码开发量减少跟多，专注于配置文件和reslove文件即可，加快开发</li>
+<li>也同样因为上面，自动生成代码导致内部逻辑被隐藏，进而导致内部细节不够透明</li>
+<li>不管从支持的功能，还是迭代开发，个人觉得<code>gqlgen</code>都是首选</li>
+<li>但是由于支持的功能较多，所以想要深入使用，门槛较高</li>
+</ul>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/19135/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2021-08-11 23:00:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/go/" title="go">
+                        #go
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/graphql/" title="graphql">
+                        #graphql
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/23091/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B"><span class="toc-text">简单示例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-text">配置文件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#starwars%E6%98%9F%E7%90%83%E5%A4%A7%E6%88%98"><span class="toc-text">starwars星球大战</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E6%B7%BB%E5%8A%A0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95"><span class="toc-text">2、添加可执行方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E5%AE%8C%E6%88%90schema-resolvers-go%E9%80%BB%E8%BE%91"><span class="toc-text">3、完成schema.resolvers.go逻辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81%E9%AA%8C%E8%AF%81"><span class="toc-text">4、验证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

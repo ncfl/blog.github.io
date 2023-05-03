@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      jdk8函数式编程 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">jdk8函数式编程</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2018-10-12 17:23:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/java/" title="java">
+                    #java
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <p>##jdk8的函数式编程主要有<code>supplier</code> <code>Consumer</code> <code>Function </code> <code>Predicate</code>和 <code>Operator</code>五种，分别对这五种进行测试如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br><span class="line">540</span><br><span class="line">541</span><br><span class="line">542</span><br><span class="line">543</span><br><span class="line">544</span><br><span class="line">545</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestFunctionInterface</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LoggerFactory.getLogger(TestFunctionInterface.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        testFunction(<span class="number">1</span>);</span><br><span class="line">        testIntFunction(<span class="number">1</span>);</span><br><span class="line">        testLongFunction(<span class="number">1</span>);</span><br><span class="line">        testDoubleFunction(<span class="number">1</span>);</span><br><span class="line">        testIntToLongFunction(<span class="number">1</span>);</span><br><span class="line">        testIntToDoubleFunction(<span class="number">1</span>);</span><br><span class="line">        testLongToIntFunction(<span class="number">1</span>);</span><br><span class="line">        testLongToDoubleFunction(<span class="number">1</span>);</span><br><span class="line">        testDoubleToIntFunction(<span class="number">1</span>);</span><br><span class="line">        testDoubleToLongFunction(<span class="number">1</span>);</span><br><span class="line">        testToIntFunction(<span class="number">1</span>);</span><br><span class="line">        testToLongFunction(<span class="number">1</span>);</span><br><span class="line">        testToDoubleFunction(<span class="number">1</span>);</span><br><span class="line">        testBiFunction(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testToIntBiFunction(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testToLongBiFunction(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testToDoubleBiFunction(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        testConsumer(<span class="number">1</span>);</span><br><span class="line">        testIntConsumer(<span class="number">1</span>);</span><br><span class="line">        testLongConsumer(<span class="number">1</span>);</span><br><span class="line">        testDoubleConsumer(<span class="number">1</span>);</span><br><span class="line">        testBiConsumer(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testObjIntConsumer(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testObjLongConsumer(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testObjDoubleConsumer(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        testBinaryOperator(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testIntBinaryOperator(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testLongBinaryOperator(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testDoubleBinaryOperator(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        testUnaryOperator(<span class="number">1</span>);</span><br><span class="line">        testIntUnaryOperator(<span class="number">1</span>);</span><br><span class="line">        testLongUnaryOperator(<span class="number">1</span>);</span><br><span class="line">        testDoubleUnaryOperator(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        testPredicate(<span class="number">1</span>);</span><br><span class="line">        testIntPredicate(<span class="number">1</span>);</span><br><span class="line">        testLongPredicate(<span class="number">1</span>);</span><br><span class="line">        testDoublePredicate(<span class="number">1</span>);</span><br><span class="line">        testBiPredicate(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        testSupplier();</span><br><span class="line">        testIntSupplier();</span><br><span class="line">        testLongSupplier();</span><br><span class="line">        testDoubleSupplier();</span><br><span class="line">        testBooleanSupplier();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Function////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，返回一个结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testFunction*************&quot;</span>);</span><br><span class="line">        Function&lt;Integer, Integer&gt; function = x -&gt; x + <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, function.apply(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个int类型输入参数，返回一个结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">IntFunction</span> <span class="variable">intFunction</span> <span class="operator">=</span> x -&gt; x + <span class="number">100</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intFunction.apply(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/***</span></span><br><span class="line"><span class="comment">     * 接受一个long类型输入参数，返回一个结果 </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongFunction</span><span class="params">(<span class="type">long</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">LongFunction</span> <span class="variable">longFunction</span> <span class="operator">=</span> x -&gt; x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longFunction.apply(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个double类型输入参数，返回一个结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleFunction</span><span class="params">(<span class="type">double</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleFunction</span> <span class="variable">df</span> <span class="operator">=</span> x -&gt; x + <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, df.apply(d));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个int类型输入，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntToLongFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntToLongFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">IntToLongFunction</span> <span class="variable">intToLongFunction</span> <span class="operator">=</span> x -&gt; (<span class="type">long</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intToLongFunction.applyAsLong(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个int类型输入，返回一个double类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntToDoubleFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntToDoubleFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">IntToDoubleFunction</span> <span class="variable">intToDoubleFunction</span> <span class="operator">=</span> x -&gt; (<span class="type">double</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intToDoubleFunction.applyAsDouble(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个long类型输入，返回一个int类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongToIntFunction</span><span class="params">(<span class="type">long</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongToIntFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">LongToIntFunction</span> <span class="variable">longToIntFunction</span> <span class="operator">=</span> x -&gt; (<span class="type">int</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longToIntFunction.applyAsInt(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个long类型输入，返回一个double类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongToDoubleFunction</span><span class="params">(<span class="type">long</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongToDoubleFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">LongToDoubleFunction</span> <span class="variable">longToDoubleFunction</span> <span class="operator">=</span> x -&gt; (<span class="type">double</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longToDoubleFunction.applyAsDouble(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个double类型输入，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleToLongFunction</span><span class="params">(<span class="type">double</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleToLongFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleToLongFunction</span> <span class="variable">dtifl</span> <span class="operator">=</span> x -&gt; (<span class="type">long</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, dtifl.applyAsLong(d));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个double类型输入，返回一个int类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleToIntFunction</span><span class="params">(<span class="type">double</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleToIntFunction*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleToIntFunction</span> <span class="variable">dtif</span> <span class="operator">=</span> x -&gt; (<span class="type">int</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, dtif.applyAsInt(d));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，返回一个int类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToIntFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToIntFunction*************&quot;</span>);</span><br><span class="line">        ToIntFunction&lt;Integer&gt; toIntFunction = x -&gt; (<span class="type">int</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toIntFunction.applyAsInt(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToLongFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToLongFunction*************&quot;</span>);</span><br><span class="line">        ToLongFunction&lt;Integer&gt; toLongFunction = Integer::longValue;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toLongFunction.applyAsLong(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，返回一个double类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToDoubleFunction</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToDoubleFunction*************&quot;</span>);</span><br><span class="line">        ToDoubleFunction&lt;Integer&gt; toDoubleFunction = x -&gt; (<span class="type">double</span>) x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toDoubleFunction.applyAsDouble(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 代表了一个接受两个输入参数的方法，并且返回一个结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testBiFunction</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testBiFunction*************&quot;</span>);</span><br><span class="line">        BiFunction&lt;Integer, Integer, Integer&gt; fun = (s1, s2) -&gt; s1 + s2;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, fun.apply(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个输入参数，返回一个int类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToIntBiFunction</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToIntBiFunction*************&quot;</span>);</span><br><span class="line">        ToIntBiFunction&lt;Integer, Integer&gt; toIntBiFunction = (x, y) -&gt; x + y;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toIntBiFunction.applyAsInt(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个输入参数，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToLongBiFunction</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToLongBiFunction*************&quot;</span>);</span><br><span class="line">        ToLongBiFunction&lt;Integer, Integer&gt; toLongBiFunction = (x, y) -&gt; x.longValue() + y.longValue();</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toLongBiFunction.applyAsLong(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个输入参数，返回一个double类型结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testToDoubleBiFunction</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testToDoubleBiFunction*************&quot;</span>);</span><br><span class="line">        ToDoubleBiFunction&lt;Integer, Integer&gt; toDoubleBiFunction = (x, y) -&gt; (<span class="type">double</span>) x + (<span class="type">double</span>) y;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, toDoubleBiFunction.applyAsDouble(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//Consumer////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testConsumer</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testConsumer*************&quot;</span>);</span><br><span class="line">        Consumer&lt;Integer&gt; consumer = x -&gt; logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, x);</span><br><span class="line">        consumer.accept(a);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个int类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntConsumer</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntConsumer*************&quot;</span>);</span><br><span class="line">        <span class="type">IntConsumer</span> <span class="variable">intConsumer</span> <span class="operator">=</span> x -&gt; logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, x);</span><br><span class="line">        intConsumer.accept(a);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个long类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongConsumer</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongConsumer*************&quot;</span>);</span><br><span class="line">        <span class="type">LongConsumer</span> <span class="variable">longConsumer</span> <span class="operator">=</span> x -&gt; logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, x);</span><br><span class="line">        longConsumer.accept(a);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个double类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleConsumer</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleConsumer*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleConsumer</span> <span class="variable">dc</span> <span class="operator">=</span> x -&gt; logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, x);</span><br><span class="line">        dc.accept(a);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个输入参数作，无返回任何值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testBiConsumer</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testBiConsumer*************&quot;</span>);</span><br><span class="line">        BiConsumer&lt;Integer, Integer&gt; biConsumer = (x, y) -&gt; logger.info(<span class="string">&quot;&#123;&#125;-----&#123;&#125;&quot;</span>, x, y);</span><br><span class="line">        biConsumer.accept(a, b);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个object类型和一个int类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testObjIntConsumer</span><span class="params">(Object a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testObjIntConsumer*************&quot;</span>);</span><br><span class="line">        ObjIntConsumer&lt;Object&gt; objIntConsumer = (x, y) -&gt; logger.info(<span class="string">&quot;obj:&#123;&#125;------int:&#123;&#125;&quot;</span>, x, y);</span><br><span class="line">        objIntConsumer.accept(a, b);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个object类型和一个long类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testObjLongConsumer</span><span class="params">(Object a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testObjLongConsumer*************&quot;</span>);</span><br><span class="line">        ObjLongConsumer&lt;Object&gt; objLongConsumer = (x, y) -&gt; logger.info(<span class="string">&quot;obj:&#123;&#125;------long:&#123;&#125;&quot;</span>, x, y);</span><br><span class="line">        objLongConsumer.accept(a, b);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个object类型和一个double类型的输入参数，无返回值</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testObjDoubleConsumer</span><span class="params">(Object a, <span class="type">int</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testObjDoubleConsumer*************&quot;</span>);</span><br><span class="line">        ObjDoubleConsumer&lt;Object&gt; objDoubleConsumer = (x, y) -&gt; logger.info(<span class="string">&quot;obj:&#123;&#125;------double:&#123;&#125;&quot;</span>, x, y);</span><br><span class="line">        objDoubleConsumer.accept(a, d);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Operator////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 代表了一个作用于于两个同类型操作符的操作，并且返回了操作符同类型的结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testBinaryOperator</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testBinaryOperator*************&quot;</span>);</span><br><span class="line">        BinaryOperator&lt;Integer&gt; t1 = BinaryOperator.minBy(Integer::compare);</span><br><span class="line">        BinaryOperator&lt;Integer&gt; t2 = BinaryOperator.maxBy(Integer::compare);</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;,&#123;&#125;&quot;</span>, t1.apply(a, b), t2.apply(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个参数同为类型int,返回值类型也为int</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntBinaryOperator</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntBinaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">IntBinaryOperator</span> <span class="variable">intBinaryOperator</span> <span class="operator">=</span> (x, y) -&gt; x + y;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intBinaryOperator.applyAsInt(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个参数同为类型long,返回值类型也为long</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongBinaryOperator</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongBinaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">LongBinaryOperator</span> <span class="variable">longBinaryOperator</span> <span class="operator">=</span> (x, y) -&gt; x + y;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longBinaryOperator.applyAsLong(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受两个参数同为类型double,返回值类型也为double</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleBinaryOperator</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleBinaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleBinaryOperator</span> <span class="variable">dbo</span> <span class="operator">=</span> (x, y) -&gt; x + y;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, dbo.applyAsDouble(a, b));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个参数为类型T,返回值类型也为T</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testUnaryOperator</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testUnaryOperator*************&quot;</span>);</span><br><span class="line">        UnaryOperator&lt;Integer&gt; unaryOperator = x -&gt; x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, unaryOperator.apply(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个参数同为类型int,返回值类型也为int</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntUnaryOperator</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntUnaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">IntUnaryOperator</span> <span class="variable">intUnaryOperator</span> <span class="operator">=</span> x -&gt; x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intUnaryOperator.applyAsInt(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个参数同为类型int,返回值类型也为long</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongUnaryOperator</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongUnaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">LongUnaryOperator</span> <span class="variable">longUnaryOperator</span> <span class="operator">=</span> x -&gt; x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longUnaryOperator.applyAsLong(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个参数同为类型int,返回值类型也为double</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleUnaryOperator</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleUnaryOperator*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleUnaryOperator</span> <span class="variable">doubleUnaryOperator</span> <span class="operator">=</span> x -&gt; x;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, doubleUnaryOperator.applyAsDouble(d));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Predicate////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个输入参数，返回一个布尔值结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testPredicate</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testPredicate*************&quot;</span>);</span><br><span class="line">        Predicate&lt;Integer&gt; predicate = x -&gt; x &gt; <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, predicate.test(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个int输入参数，返回一个布尔值的结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntPredicate</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntPredicate*************&quot;</span>);</span><br><span class="line">        <span class="type">IntPredicate</span> <span class="variable">intPredicate</span> <span class="operator">=</span> x -&gt; x &gt; <span class="number">100</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intPredicate.test(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个long输入参数，返回一个布尔值的结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongPredicate</span><span class="params">(<span class="type">int</span> a)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongPredicate*************&quot;</span>);</span><br><span class="line">        <span class="type">LongPredicate</span> <span class="variable">longPredicate</span> <span class="operator">=</span> x -&gt; x &gt; <span class="number">100</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longPredicate.test(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 接受一个double输入参数，返回一个布尔值的结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> d</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoublePredicate</span><span class="params">(<span class="type">int</span> d)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoublePredicate*************&quot;</span>);</span><br><span class="line">        <span class="type">DoublePredicate</span> <span class="variable">dp</span> <span class="operator">=</span> x -&gt; x &gt; <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, dp.test(d));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 代表了一个两个参数的boolean值方法</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> a</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> b</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testBiPredicate</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testBiPredicate*************&quot;</span>);</span><br><span class="line">        BiPredicate&lt;Integer, Integer&gt; biPredicate = (x, y) -&gt; x &gt;= y;</span><br><span class="line">        BiPredicate&lt;Integer, Integer&gt; biPredicate1 = (x, y) -&gt; (y + x) &gt; <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;,&#123;&#125;&quot;</span>, biPredicate.test(a, b), biPredicate.and(biPredicate1).test(<span class="number">6</span>, <span class="number">6</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Supplier////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 无参数，返回一个结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testSupplier</span><span class="params">()</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testSupplier*************&quot;</span>);</span><br><span class="line">        Supplier&lt;Integer&gt; supplier = () -&gt; <span class="number">10</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, supplier.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 无参数，返回一个int类型结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testIntSupplier</span><span class="params">()</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testIntSupplier*************&quot;</span>);</span><br><span class="line">        <span class="type">IntSupplier</span> <span class="variable">intSupplier</span> <span class="operator">=</span> () -&gt; <span class="number">100</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, intSupplier.getAsInt());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 无参数，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testLongSupplier</span><span class="params">()</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testLongSupplier*************&quot;</span>);</span><br><span class="line">        <span class="type">LongSupplier</span> <span class="variable">longSupplier</span> <span class="operator">=</span> () -&gt; <span class="number">100L</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, longSupplier.getAsLong());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 无参数，返回一个long类型结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testDoubleSupplier</span><span class="params">()</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testDoubleSupplier*************&quot;</span>);</span><br><span class="line">        <span class="type">DoubleSupplier</span> <span class="variable">ds</span> <span class="operator">=</span> () -&gt; <span class="number">10d</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, ds.getAsDouble());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 无参数，返回一个boolean类型结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testBooleanSupplier</span><span class="params">()</span> &#123;</span><br><span class="line">        logger.info(<span class="string">&quot;*************testBooleanSupplier*************&quot;</span>);</span><br><span class="line">        <span class="type">BooleanSupplier</span> <span class="variable">bs</span> <span class="operator">=</span> () -&gt; <span class="literal">false</span>;</span><br><span class="line">        logger.info(<span class="string">&quot;&#123;&#125;&quot;</span>, bs.getAsBoolean());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/2930/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2018-10-12 17:23:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/java/" title="java">
+                        #java
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/27910/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

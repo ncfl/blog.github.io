@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <meta name="author" content="ncfl" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      graphql（一）graphql-java文档初步阅读 
+      
+      
+      |
+    
+     ncfl
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/snow.png">
+    <link rel="icon" href="/images/snow.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/snow.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/"></a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">graphql（一）graphql-java文档初步阅读</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2017-07-03 17:40:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/java/" title="java">
+                    #java
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/graphql/" title="graphql">
+                    #graphql
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <p>由于公司的原因，最近在学习GraphQL。</p>
+<p>这次的学习主要是从<a target="_blank" rel="noopener external nofollow noreferrer" href="http://graphql-java.readthedocs.io/en/stable/getting_started.html">graphql-java文档</a>上入手，对语言的文档有初步的认识；</p>
+<h2 id="GraphQL简介"><a href="#GraphQL简介" class="headerlink" title="GraphQL简介"></a><strong>GraphQL简介</strong></h2><p>在 2015 React 欧洲大会上，Lee Byron 介绍了 Facebook 的 GraphQL ，包含 GraphQL 背后的故事，查询语句的示例，还有核心的概念。GraphQL 非常易懂，直接看查询语句就能知道查询出来的数据是什么样的。你可以把 GraphQL 的查询语句想成是没有值，只有属性的对象，返回的结果就是对应的属性还有对应值的对象。<br>故事</p>
+<p>从 2011 开始，Facebook 开始越来越重视移动端，一支很小的团队开始去做 Android 与 iOS 应用。Facebook 的强项是 Web，也非常的了解 Web ，而且在这方面储备了大量的技术。当年 Facebook 的主要平台就是传统的 浏览器 Web 服务器 数据服务 的组合，Web 服务器响应浏览器的请求，到数据服务那里提供出数据，然后再交给浏览器去显示。</p>
+<p>他们打算尽可能的使用现有的代码去实施移动端的应用，所以一开始 Facebook 的移动应用就是一个浏览器，加上了一个本地的壳，内容基本上就是简单的定制以后的移动 Web 网站。这样的好处就是可以使用所有的现有的 Web 平台上的东西。这样工程师们也可以使用平时创建东西的方法。这种方法在短时间内也得到了很大的成功，并且让公司把重点放在移动端上。</p>
+<p>一开始都还好，不过在移动应用上添加越来越多的功能以后，就有点吃力了，移动浏览器经常会消耗掉所有的内存，让应用崩溃。另一面，在 Web 上，Facebook 仍然快速的生成，而移动端有点跟不上脚步了。这让他们决定要去做真正的本地的移动应用。</p>
+<p>2012 年开始，Facebook 要开始开发真正的本地应用。 这跟 Web 很不一样，所以开始重新思考应用的平台。Web 就是请求一个 URL ，返回一堆 HTML。而本地移动应用，为了给应用提供需要的数据，填充数据模型 ，显示视图，要想的问题是，怎么去请求，准备，传递这些数据。而当时 Facebook 现有的服务器主要功能还是只提供 HTML。</p>
+<p>工程师们试了一些方法，比如 RESTful API，对于 Facebook 这种复杂的应用，可能需要定义很多的端点，不同的端点返回来的数据只是略有不同，造成了资源浪费，而且还需要大量的逻辑去处理这些数据。后来他们又试了 FQL， 这是 Facebook 的公共接口，应该是一种查询语言。功能很强大，而且返回来的数据也有很好的结构。不好的地方是，查询用的语言非常难理解，比如多个 JOIN ，主键什么的，所以经常会出错。</p>
+<p>除了这些表面上遇到的问题，工程师们也非常不喜欢这些方法表达数据的形式，比如我们平时想像的数据并不是一大堆查询语言，LEFT JOIN，RIGHT JOIN ..   也不是资源的地址。而对象的形式非常适合表达数据，一个对象，里面有一些属性，不同的属性对应不同的值。几个工程师开始了现在的 GraphQL，一种用对象，属性，关系的，有点像图形的方式来表达想要的数据。</p>
+<p>三年前，Facebook 用了 GraphQL 做了第一款真正的本地移动应用，现在，应用每天会接受 260 亿的请求。</p>
+<p>关于GraphQL的简介主要是从<a target="_blank" rel="noopener external nofollow noreferrer" href="https://ninghao.net/blog/2857">https://ninghao.net/blog/2857</a>上复制过来的。</p>
+<hr>
+<h2 id="GraphQL-java文档相关"><a href="#GraphQL-java文档相关" class="headerlink" title="GraphQL-java文档相关"></a><strong>GraphQL-java文档相关</strong></h2><p>&#x2F;&#x2F;以下全是个人的理解，目前只是初学，如果有错误欢迎指正。</p>
+<hr>
+<p>jdk1.8以上才支持graphql-java</p>
+<p>1、maven拉取所需要的graphql-java包，现在已经更新到3.0.0版本了</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.graphql-java<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>graphql-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p>2、这是官网给出的，也是很多博客网站给出的graphql最经典的java例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> graphql.GraphQL;</span><br><span class="line"><span class="keyword">import</span> graphql.schema.GraphQLObjectType;</span><br><span class="line"><span class="keyword">import</span> graphql.schema.GraphQLSchema;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> graphql.Scalars.GraphQLString;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> graphql.schema.GraphQLFieldDefinition.newFieldDefinition;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> graphql.schema.GraphQLObjectType.newObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloWorld</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">GraphQLObjectType</span> <span class="variable">queryType</span> <span class="operator">=</span> newObject()</span><br><span class="line">                .name(<span class="string">&quot;helloWorldQuery&quot;</span>)</span><br><span class="line">                .field(newFieldDefinition()</span><br><span class="line">                        .type(GraphQLString)</span><br><span class="line">                        .name(<span class="string">&quot;hello&quot;</span>)</span><br><span class="line">                        .staticValue(<span class="string">&quot;world&quot;</span>))</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="type">GraphQLSchema</span> <span class="variable">schema</span> <span class="operator">=</span> GraphQLSchema.newSchema()</span><br><span class="line">                .query(queryType)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="type">GraphQL</span> <span class="variable">graphQL</span> <span class="operator">=</span> GraphQL.newGraphQL(schema).build();</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Object&gt; result = graphQL.execute(<span class="string">&quot;&#123;hello&#125;&quot;</span>).getData();</span><br><span class="line">        System.out.println(result);</span><br><span class="line">        <span class="comment">// Prints: &#123;hello=world&#125;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p>3、graphql-java定义了两种schema语言，一种是标准的java语言的，一种是<a target="_blank" rel="noopener external nofollow noreferrer" href="https://facebook.github.io/graphql/#sec-Overview">IDL</a>，类似json格式的语言；<br>下面是两种的示例：<br>IDL（目前个人的理解是用于前端的）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">type Foo &#123;</span><br><span class="line">    bar: String</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java（目前个人理解是用于后台）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLObjectType</span> <span class="variable">fooType</span> <span class="operator">=</span> newObject()</span><br><span class="line">    .name(<span class="string">&quot;Foo&quot;</span>)</span><br><span class="line">    .field(newFieldDefinition()</span><br><span class="line">            .name(<span class="string">&quot;bar&quot;</span>)</span><br><span class="line">            .type(GraphQLString))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+<p>比较一下两种语言还是很好理解，这里需要说一下，newFieldDefinition和newObject都是静态方法，需要引入或者声明变量调用，感觉graphql中都是用引入的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> graphql.schema.GraphQLFieldDefinition.newFieldDefinition;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> graphql.schema.GraphQLObjectType.newObject;</span><br></pre></td></tr></table></figure>
+<p>方法属于哪个包中，在eclipse中可以通过ctrl+H查找；idea中还没有试过；</p>
+<hr>
+<p>4、DataFetcher和TypeResolver<br>DataFetcher有点不是很理解，每一个搜索域可以指定DataFetcher，如果没有指定的话，就是用默认的PropertyDataFetcher， PropertyDataFetcher主要是Map或者JavaBeans中获取数据，与Map中的Key对应，和JavaBeans中的变量名对应；<br>TypeResolver就是数据的类型<br>官网给出的IDL示例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">schema &#123;</span><br><span class="line">    query: QueryType</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type QueryType &#123;</span><br><span class="line">    hero(episode: Episode): Character</span><br><span class="line">    human(id : String) : Human</span><br><span class="line">    droid(id: ID!): Droid</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">enum Episode &#123;</span><br><span class="line">    NEWHOPE</span><br><span class="line">    EMPIRE</span><br><span class="line">    JEDI</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">interface Character &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">    friends: [Character]</span><br><span class="line">    appearsIn: [Episode]!</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Human implements Character &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">    friends: [Character]</span><br><span class="line">    appearsIn: [Episode]!</span><br><span class="line">    homePlanet: String</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Droid implements Character &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">    friends: [Character]</span><br><span class="line">    appearsIn: [Episode]!</span><br><span class="line">    primaryFunction: String</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java代码<br>目前这里面的内容不懂的部分还是很多的<br>①loadSchema这个方法是在哪里定义的至今没有找到；<br>②starWarsSchema.graphqls这个文件怎么定义的？里面的内容是什么；<br>③StarWarsData理解上应该是一个entity类，但是为什么没有申明变量就可以直接使用里面getter和setter，还是需要申明了，但是文档觉得没有必要给出这部分代码；<br>④CustomScalar定义在哪里？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaParser</span> <span class="variable">schemaParser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SchemaParser</span>();</span><br><span class="line"><span class="type">SchemaGenerator</span> <span class="variable">schemaGenerator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SchemaGenerator</span>();</span><br><span class="line"></span><br><span class="line"><span class="type">File</span> <span class="variable">schemaFile</span> <span class="operator">=</span> loadSchema(<span class="string">&quot;starWarsSchema.graphqls&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">TypeDefinitionRegistry</span> <span class="variable">typeRegistry</span> <span class="operator">=</span> schemaParser.parse(schemaFile);</span><br><span class="line"><span class="type">RuntimeWiring</span> <span class="variable">wiring</span> <span class="operator">=</span> buildRuntimeWiring();</span><br><span class="line"><span class="type">GraphQLSchema</span> <span class="variable">graphQLSchema</span> <span class="operator">=</span> schemaGenerator.makeExecutableSchema(typeRegistry, wiring);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RuntimeWiring <span class="title function_">buildRuntimeWiring</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> RuntimeWiring.newRuntimeWiring()</span><br><span class="line">            .scalar(CustomScalar)</span><br><span class="line">            <span class="comment">// this uses builder function lambda syntax</span></span><br><span class="line">            .type(<span class="string">&quot;QueryType&quot;</span>, typeWiring -&gt; typeWiring</span><br><span class="line">                    .dataFetcher(<span class="string">&quot;hero&quot;</span>, <span class="keyword">new</span> <span class="title class_">StaticDataFetcher</span>(StarWarsData.getArtoo()))</span><br><span class="line">                    .dataFetcher(<span class="string">&quot;human&quot;</span>, StarWarsData.getHumanDataFetcher())</span><br><span class="line">                    .dataFetcher(<span class="string">&quot;droid&quot;</span>, StarWarsData.getDroidDataFetcher())</span><br><span class="line">            )</span><br><span class="line">            .type(<span class="string">&quot;Human&quot;</span>, typeWiring -&gt; typeWiring</span><br><span class="line">                    .dataFetcher(<span class="string">&quot;friends&quot;</span>, StarWarsData.getFriendsDataFetcher())</span><br><span class="line">            )</span><br><span class="line">            <span class="comment">// you can use builder syntax if you don&#x27;t like the lambda syntax</span></span><br><span class="line">            .type(<span class="string">&quot;Droid&quot;</span>, typeWiring -&gt; typeWiring</span><br><span class="line">                    .dataFetcher(<span class="string">&quot;friends&quot;</span>, StarWarsData.getFriendsDataFetcher())</span><br><span class="line">            )</span><br><span class="line">            <span class="comment">// or full builder syntax if that takes your fancy</span></span><br><span class="line">            .type(</span><br><span class="line">                    newTypeWiring(<span class="string">&quot;Character&quot;</span>)</span><br><span class="line">                            .typeResolver(StarWarsData.getCharacterTypeResolver())</span><br><span class="line">                            .build()</span><br><span class="line">            )</span><br><span class="line">            .build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>官网还给出了另外一种buildDynamicRuntimeWiring，根据名字为动态的RuntimeWiring，但是里面的方法也不是很懂，有人懂得望告知：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">RuntimeWiring buildDynamicRuntimeWiring() &#123;</span><br><span class="line">    WiringFactory dynamicWiringFactory = new WiringFactory() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public boolean providesTypeResolver(TypeDefinitionRegistry registry, InterfaceTypeDefinition definition) &#123;</span><br><span class="line">            return getDirective(definition,&quot;specialMarker&quot;) != null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean providesTypeResolver(TypeDefinitionRegistry registry, UnionTypeDefinition definition) &#123;</span><br><span class="line">            return getDirective(definition,&quot;specialMarker&quot;) != null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public TypeResolver getTypeResolver(TypeDefinitionRegistry registry, InterfaceTypeDefinition definition) &#123;</span><br><span class="line">            Directive directive  = getDirective(definition,&quot;specialMarker&quot;);</span><br><span class="line">            return createTypeResolver(definition,directive);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public TypeResolver getTypeResolver(TypeDefinitionRegistry registry, UnionTypeDefinition definition) &#123;</span><br><span class="line">            Directive directive  = getDirective(definition,&quot;specialMarker&quot;);</span><br><span class="line">            return createTypeResolver(definition,directive);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean providesDataFetcher(TypeDefinitionRegistry registry, FieldDefinition definition) &#123;</span><br><span class="line">            return getDirective(definition,&quot;dataFetcher&quot;) != null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public DataFetcher getDataFetcher(TypeDefinitionRegistry registry, FieldDefinition definition) &#123;</span><br><span class="line">            Directive directive = getDirective(definition, &quot;dataFetcher&quot;);</span><br><span class="line">            return createDataFetcher(definition,directive);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    return RuntimeWiring.newRuntimeWiring()</span><br><span class="line">            .wiringFactory(dynamicWiringFactory).build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p>5、类型：<br>GraphQL提供一下类型：</p>
+<ul>
+<li>Scalar</li>
+<li>Object</li>
+<li>Interface</li>
+<li>Union</li>
+<li>InputObject</li>
+<li>Enum</li>
+</ul>
+<p><strong>Scalar</strong></p>
+<ul>
+<li>GraphQLString</li>
+<li>GraphQLBoolean</li>
+<li>GraphQLInt</li>
+<li>GraphQLFloat</li>
+<li>GraphQLID</li>
+<li>GraphQLLong</li>
+<li>GraphQLShort</li>
+<li>GraphQLByte</li>
+<li>GraphQLFloat</li>
+<li>GraphQLBigDecimal</li>
+<li>GraphQLBigInteger</li>
+</ul>
+<p><strong>Object</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type SimpsonCharacter &#123;</span><br><span class="line">    name: String</span><br><span class="line">    mainCharacter: Boolean</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLObjectType</span> <span class="variable">simpsonCharacter</span> <span class="operator">=</span> newObject()</span><br><span class="line">.name(<span class="string">&quot;SimpsonCharacter&quot;</span>)</span><br><span class="line">.description(<span class="string">&quot;A Simpson character&quot;</span>)</span><br><span class="line">.field(newFieldDefinition()</span><br><span class="line">        .name(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">        .description(<span class="string">&quot;The name of the character.&quot;</span>)</span><br><span class="line">        .type(GraphQLString))</span><br><span class="line">.field(newFieldDefinition()</span><br><span class="line">        .name(<span class="string">&quot;mainCharacter&quot;</span>)</span><br><span class="line">        .description(<span class="string">&quot;One of the main Simpson characters?&quot;</span>)</span><br><span class="line">        .type(GraphQLBoolean))</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure>
+
+<p><strong>Interface</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interface ComicCharacter &#123;</span><br><span class="line">    name: String;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLInterfaceType</span> <span class="variable">comicCharacter</span> <span class="operator">=</span> newInterface()</span><br><span class="line">    .name(<span class="string">&quot;ComicCharacter&quot;</span>)</span><br><span class="line">    .description(<span class="string">&quot;A abstract comic character.&quot;</span>)</span><br><span class="line">    .field(newFieldDefinition()</span><br><span class="line">            .name(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">            .description(<span class="string">&quot;The name of the character.&quot;</span>)</span><br><span class="line">            .type(GraphQLString))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<p><strong>Union</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interface ComicCharacter &#123;</span><br><span class="line">    name: String;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLUnionType</span> <span class="variable">PetType</span> <span class="operator">=</span> newUnionType()</span><br><span class="line">    .name(<span class="string">&quot;Pet&quot;</span>)</span><br><span class="line">    .possibleType(CatType)</span><br><span class="line">    .possibleType(DogType)</span><br><span class="line">    .typeResolver(<span class="keyword">new</span> <span class="title class_">TypeResolver</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> GraphQLObjectType <span class="title function_">getType</span><span class="params">(TypeResolutionEnvironment env)</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (env.getObject() <span class="keyword">instanceof</span> Cat) &#123;</span><br><span class="line">                <span class="keyword">return</span> CatType;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (env.getObject() <span class="keyword">instanceof</span> Dog) &#123;</span><br><span class="line">                <span class="keyword">return</span> DogType;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+<p><strong>Enum</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">enum Color &#123;</span><br><span class="line">    RED</span><br><span class="line">    GREEN</span><br><span class="line">    BLUE</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLEnumType</span> <span class="variable">colorEnum</span> <span class="operator">=</span> newEnum()</span><br><span class="line">    .name(<span class="string">&quot;Color&quot;</span>)</span><br><span class="line">    .description(<span class="string">&quot;Supported colors.&quot;</span>)</span><br><span class="line">    .value(<span class="string">&quot;RED&quot;</span>)</span><br><span class="line">    .value(<span class="string">&quot;GREEN&quot;</span>)</span><br><span class="line">    .value(<span class="string">&quot;BLUE&quot;</span>)</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<p><strong>ObjectInputType</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">input Character &#123;</span><br><span class="line">    name: String</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GraphQLInputObjectType</span> <span class="variable">inputObjectType</span> <span class="operator">=</span> newInputObject()</span><br><span class="line">    .name(<span class="string">&quot;inputObjectType&quot;</span>)</span><br><span class="line">    .field(newInputObjectField()</span><br><span class="line">            .name(<span class="string">&quot;field&quot;</span>)</span><br><span class="line">            .type(GraphQLString))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p>6、递归类型<br>每个人都是有朋友的，每个人的朋友都是人，然后每个人又都有朋友，朋友又会有朋友的朋友，就是一直递归下去，graphql-java不会出现这种情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">GraphQLObjectType person = newObject()</span><br><span class="line">    .name(&quot;Person&quot;)</span><br><span class="line">    .field(newFieldDefinition()</span><br><span class="line">            .name(&quot;friends&quot;)</span><br><span class="line">            .type(new GraphQLList(new GraphQLTypeReference(&quot;Person&quot;))))</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<p>7、对于查询的类可进行扩展<br>java代码上是这样是实现的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SchemaParser</span> <span class="variable">schemaParser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SchemaCompiler</span>();</span><br><span class="line"><span class="type">SchemaGenerator</span> <span class="variable">schemaGenerator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SchemaGenerator</span>();</span><br><span class="line"></span><br><span class="line"><span class="type">File</span> <span class="variable">schemaFile1</span> <span class="operator">=</span> loadSchema(<span class="string">&quot;starWarsSchemaPart1.graphqls&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">schemaFile2</span> <span class="operator">=</span> loadSchema(<span class="string">&quot;starWarsSchemaPart2.graphqls&quot;</span>);</span><br><span class="line"><span class="type">File</span> <span class="variable">schemaFile3</span> <span class="operator">=</span> loadSchema(<span class="string">&quot;starWarsSchemaPart3.graphqls&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">TypeDefinitionRegistry</span> <span class="variable">typeRegistry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TypeDefinitionRegistry</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// each registry is merged into the main registry</span></span><br><span class="line">typeRegistry.merge(schemaParser.compile(schemaFile1));</span><br><span class="line">typeRegistry.merge(schemaParser.compile(schemaFile2));</span><br><span class="line">typeRegistry.merge(schemaParser.compile(schemaFile3));</span><br><span class="line"></span><br><span class="line"><span class="type">GraphQLSchema</span> <span class="variable">graphQLSchema</span> <span class="operator">=</span> schemaGenerator.makeExecutableSchema(typeRegistry, buildRuntimeWiring());</span><br></pre></td></tr></table></figure>
+<p>在IDL中大概就是下面这种情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">type Human &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">&#125;</span><br><span class="line">#Another part of your system can extend this type to add more shape to it.</span><br><span class="line">extend type Human implements Character &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">    friends: [Character]</span><br><span class="line">    appearsIn: [Episode]!</span><br><span class="line">&#125;</span><br><span class="line">#You can have as many extensions as you think sensible. </span><br><span class="line">extend type Human &#123;</span><br><span class="line">    homePlanet: String</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#With all these type extensions in place the Human type now looks like this at runtime.</span><br><span class="line">type Human implements Character &#123;</span><br><span class="line">    id: ID!</span><br><span class="line">    name: String!</span><br><span class="line">    friends: [Character]</span><br><span class="line">    appearsIn: [Episode]!</span><br><span class="line">    homePlanet: String</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>今天的工作暂时就这么多，明天研究研究graphql-java源代码，再看看IDL语言，看看能不能对graphq-java有更深的了解，目前了解的情况还无法根本无法用来写代码。</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2017-07-03 17:40:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/java/" title="java">
+                        #java
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/graphql/" title="graphql">
+                        #graphql
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/post/611/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#GraphQL%E7%AE%80%E4%BB%8B"><span class="toc-text">GraphQL简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GraphQL-java%E6%96%87%E6%A1%A3%E7%9B%B8%E5%85%B3"><span class="toc-text">GraphQL-java文档相关</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/ncfl/blog_svr">Copyright © 2023 ncfl</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://beian.miit.gov.cn/">粤ICP备2023040658号</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+    <div class="footer-views">
+      
+          t:<span id="busuanzi_value_site_pv"></span>
+        
+      
+          c:<span id="busuanzi_value_page_pv"></span>
+        
+      
+          u:<span id="busuanzi_value_site_uv"></span>
+        
+      
+    </div>
+  
+</div>
+<script type="text/javascript" src="/js/click-love.js"></script>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)" rel="external nofollow noreferrer">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="请输入关键字...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)" rel="external nofollow noreferrer">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' rel="external nofollow noreferrer" target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)" rel="external nofollow noreferrer">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+
+      </div>
+    </div>
+  <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body>
+</html>

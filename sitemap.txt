@@ -59,8 +59,8 @@ https://blog.ncfl.tech/tags/elasticsearch/
 https://blog.ncfl.tech/tags/java/
 https://blog.ncfl.tech/tags/go/
 https://blog.ncfl.tech/tags/graphql/
-https://blog.ncfl.tech/tags/springboot/
 https://blog.ncfl.tech/tags/mysql/
+https://blog.ncfl.tech/tags/springboot/
 https://blog.ncfl.tech/tags/disconf/
 https://blog.ncfl.tech/tags/git/
 https://blog.ncfl.tech/tags/linux/

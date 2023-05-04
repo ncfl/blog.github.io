@@ -167,41 +167,7 @@
       <div class="markdown-body">
         <h2 id="元素range的为该元素的拷贝"><a href="#元素range的为该元素的拷贝" class="headerlink" title="元素range的为该元素的拷贝"></a><em><strong>元素range的为该元素的拷贝</strong></em></h2><p>数组或者slice在range expression副本参与循环，即range中的a为a的拷贝，与a不是同一个地址，所以range时的index和value都不是真正数组的index和value。建议range的时候使用slice或者数组指针。</p>
 <p>Map和Chan这两个数据类型除外，虽然range的也是拷贝的对象，但是该对象指向的是数据本身。</p>
-<pre><code>// 错误循环
-var a = [5]int&#123;1, 2, 3, 4, 5&#125;
-var r [5]int
-for i, v := range a &#123;
-    if i == 0 &#123;
-        a[1] = 12
-        a[2] = 13
-    &#125;
-    r[i] = v
-&#125;
-fmt.Println(&quot;a = &quot;, a) // a =  [1 2 3 4 5]
-fmt.Println(&quot;r = &quot;, r) // r =  [1 2 3 4 5]
-
-// 正确循环
-for i, _ := range a &#123;
-    if i == 0 &#123;
-        a[1] = 12
-        a[2] = 13
-    &#125;
-    r[i] = a[i]
-&#125;
-fmt.Println(&quot;a = &quot;, a) // a =  [1 12 13 4 5]
-fmt.Println(&quot;r = &quot;, r) // r =  [1 12 13 4 5]
-
-// 正确循环
-for i, v := range &amp;a &#123;
-    if i == 0 &#123;
-        a[1] = 12
-        a[2] = 13
-    &#125;
-    r[i] = v
-&#125;
-fmt.Println(&quot;a = &quot;, a) // a =  [1 12 13 4 5]
-fmt.Println(&quot;r = &quot;, r) // r =  [1 12 13 4 5]
-</code></pre>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// 错误循环</span></span><br><span class="line">    <span class="keyword">var</span> a = [<span class="number">5</span>]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">	<span class="keyword">var</span> r [<span class="number">5</span>]<span class="type">int</span></span><br><span class="line">	<span class="keyword">for</span> i, v := <span class="keyword">range</span> a &#123;</span><br><span class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</span><br><span class="line">			a[<span class="number">1</span>] = <span class="number">12</span></span><br><span class="line">			a[<span class="number">2</span>] = <span class="number">13</span></span><br><span class="line">		&#125;</span><br><span class="line">		r[i] = v</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">&quot;a = &quot;</span>, a) <span class="comment">// a =  [1 2 3 4 5]</span></span><br><span class="line">	fmt.Println(<span class="string">&quot;r = &quot;</span>, r) <span class="comment">// r =  [1 2 3 4 5]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 正确循环</span></span><br><span class="line">	<span class="keyword">for</span> i, _ := <span class="keyword">range</span> a &#123;</span><br><span class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</span><br><span class="line">			a[<span class="number">1</span>] = <span class="number">12</span></span><br><span class="line">			a[<span class="number">2</span>] = <span class="number">13</span></span><br><span class="line">		&#125;</span><br><span class="line">		r[i] = a[i]</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">&quot;a = &quot;</span>, a) <span class="comment">// a =  [1 12 13 4 5]</span></span><br><span class="line">	fmt.Println(<span class="string">&quot;r = &quot;</span>, r) <span class="comment">// r =  [1 12 13 4 5]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 正确循环</span></span><br><span class="line">	<span class="keyword">for</span> i, v := <span class="keyword">range</span> &amp;a &#123;</span><br><span class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</span><br><span class="line">			a[<span class="number">1</span>] = <span class="number">12</span></span><br><span class="line">			a[<span class="number">2</span>] = <span class="number">13</span></span><br><span class="line">		&#125;</span><br><span class="line">		r[i] = v</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">&quot;a = &quot;</span>, a) <span class="comment">// a =  [1 12 13 4 5]</span></span><br><span class="line">	fmt.Println(<span class="string">&quot;r = &quot;</span>, r) <span class="comment">// r =  [1 12 13 4 5]</span></span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
 <h2 id="GO文件加载顺序"><a href="#GO文件加载顺序" class="headerlink" title="GO文件加载顺序"></a><em><strong>GO文件加载顺序</strong></em></h2><p>同一个package下，按照文件名字符串比较从小到大顺序加载<br>不同package，按照import中声明顺序进行加载，如果有依赖，则按照依赖顺序进行加载</p>
 <h3 id="验证方法：每个go文件下声明init-方法，观察输出顺序即可"><a href="#验证方法：每个go文件下声明init-方法，观察输出顺序即可" class="headerlink" title="验证方法：每个go文件下声明init()方法，观察输出顺序即可"></a><em>验证方法</em>：每个go文件下声明<code>init()</code>方法，观察输出顺序即可</h3><h2 id="byte和rune的区别"><a href="#byte和rune的区别" class="headerlink" title="byte和rune的区别"></a><em><strong>byte和rune的区别</strong></em></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uint8类型，或者叫 byte 型，代表了ASCII码的一个字符。</span><br><span class="line">rune类型，代表一个 UTF-8字符。</span><br></pre></td></tr></table></figure>
 

@@ -11,7 +11,7 @@
   
   <title>
     
-      标签 
+      GO面经 
       
       
       |
@@ -135,21 +135,143 @@
 
 
 
-  <!-- 标签页 url形式：https://yoursite/tags/ -->
-  <div class="container tag-index">
-    <div>
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/disconf/" rel="tag">disconf</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/" rel="tag">elasticsearch</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gogs/" rel="tag">gogs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/graphql/" rel="tag">graphql</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">31</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/" rel="tag">k8s</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/" rel="tag">kafka</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leanote/" rel="tag">leanote</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/log4j/" rel="tag">log4j</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/" rel="tag">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mycat/" rel="tag">mycat</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/netty/" rel="tag">netty</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a><span class="tag-list-count">6</span></li></ul>
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">GO面经</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2024-03-13 20:57:41
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/go/" title="go">
+                    #go
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h1 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h1><h1 id="内存分配机制"><a href="#内存分配机制" class="headerlink" title="内存分配机制"></a>内存分配机制</h1><h1 id="hashMap原理"><a href="#hashMap原理" class="headerlink" title="hashMap原理"></a>hashMap原理</h1><h2 id="怎么解决hash冲突"><a href="#怎么解决hash冲突" class="headerlink" title="怎么解决hash冲突"></a>怎么解决hash冲突</h2><h2 id="refresh机制"><a href="#refresh机制" class="headerlink" title="refresh机制"></a>refresh机制</h2><p>stop the world还是惰性</p>
+<h2 id="hash冲突解决方案"><a href="#hash冲突解决方案" class="headerlink" title="hash冲突解决方案"></a>hash冲突解决方案</h2><h1 id="GO1-18新特性-泛型"><a href="#GO1-18新特性-泛型" class="headerlink" title="GO1.18新特性-泛型"></a>GO1.18新特性-泛型</h1><p>泛型（<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cnblogs.com/kevinwan/p/16223984.html%EF%BC%89">https://www.cnblogs.com/kevinwan/p/16223984.html）</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 方法</span><br><span class="line">func A[T Numeric, T2 Node[int]]() (T, T2) &#123;</span><br><span class="line">	n := T2&#123;value: 1&#125;</span><br><span class="line">	return 1, n</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type Numeric interface &#123;</span><br><span class="line">	int | float32 | float64 | int32</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type Node[T any] struct &#123;</span><br><span class="line">	value T</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type NodeCompare[T Numeric] struct &#123;</span><br><span class="line">	value T</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用场景：</p>
+<ul>
+<li>避免switch\case这种恶心的代码，或者reflect反射逻辑</li>
+<li>避免多个不同的方法因为参数不同重复写，比如比较大小</li>
+<li>对于不同类似的数据结构实现对应的方法，比如slicce，map，channel、tree、list、stack等结构</li>
+</ul>
+<p>性能影响：</p>
+<ul>
+<li>虚拟方法表：运行时，根据T的类型，将类型赋予函数，再去执行。编译快运行慢</li>
+<li>单态化：根据T的类型，编译时增加每个方法的副本，运行时直接调用即可。编译慢运行快</li>
+<li>GO：两种方法结合，如果可以推断出T的类型，比如上文中的Numeric，则采用单态化，否则使用虚拟方法表。虚拟方法表之前在GO中就被使用了。</li>
+<li>总结：性能影响不大，且不会成为瓶颈。考虑先优化函数实现，再考虑调用开销。</li>
+</ul>
+<p>JAVA &amp; GO泛型原理比较：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://jeffdingzone.com/2022/06/">https://jeffdingzone.com/2022/06/</a></p>
+<h1 id="GO1-20新特性-slice转数组，但是会指向同一个地址"><a href="#GO1-20新特性-slice转数组，但是会指向同一个地址" class="headerlink" title="GO1.20新特性-slice转数组，但是会指向同一个地址"></a>GO1.20新特性-slice转数组，但是会指向同一个地址</h1>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/post/30374/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2024-03-13 20:57:41
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/go/" title="go">
+                        #go
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-text">垃圾回收机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%9C%BA%E5%88%B6"><span class="toc-text">内存分配机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#hashMap%E5%8E%9F%E7%90%86"><span class="toc-text">hashMap原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3hash%E5%86%B2%E7%AA%81"><span class="toc-text">怎么解决hash冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#refresh%E6%9C%BA%E5%88%B6"><span class="toc-text">refresh机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hash%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-text">hash冲突解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-18%E6%96%B0%E7%89%B9%E6%80%A7-%E6%B3%9B%E5%9E%8B"><span class="toc-text">GO1.18新特性-泛型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-20%E6%96%B0%E7%89%B9%E6%80%A7-slice%E8%BD%AC%E6%95%B0%E7%BB%84%EF%BC%8C%E4%BD%86%E6%98%AF%E4%BC%9A%E6%8C%87%E5%90%91%E5%90%8C%E4%B8%80%E4%B8%AA%E5%9C%B0%E5%9D%80"><span class="toc-text">GO1.20新特性-slice转数组，但是会指向同一个地址</span></a></li></ol>
+      
     </div>
   </div>
-  
 
   
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
 
   
-
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
   
 
-  
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
+      </div>
+    
+  </div>
+
 
         
 <div class="footer">

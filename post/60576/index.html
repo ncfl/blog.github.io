@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-03-14 22:45:51
+          2024-03-18 20:58:57
         </span>
         
               <span class="post-tags">
@@ -197,8 +197,41 @@
 <li>P为空时，则M从其他P中获取一般的G来运行，再没有则从全局队列中获取G运行</li>
 <li>所有的写成都被运行完之后，M和P则会进入自选状态，不会被销毁，保证下一个协程能快速运行</li>
 </ul>
-<h1 id="hashMap原理"><a href="#hashMap原理" class="headerlink" title="hashMap原理"></a>hashMap原理</h1><h2 id="怎么解决hash冲突"><a href="#怎么解决hash冲突" class="headerlink" title="怎么解决hash冲突"></a>怎么解决hash冲突</h2><h2 id="refresh机制"><a href="#refresh机制" class="headerlink" title="refresh机制"></a>refresh机制</h2><p>stop the world还是惰性</p>
-<h2 id="hash冲突解决方案"><a href="#hash冲突解决方案" class="headerlink" title="hash冲突解决方案"></a>hash冲突解决方案</h2><h1 id="GO的堆栈图"><a href="#GO的堆栈图" class="headerlink" title="GO的堆栈图"></a>GO的堆栈图</h1><h1 id="GO1-18新特性-泛型"><a href="#GO1-18新特性-泛型" class="headerlink" title="GO1.18新特性-泛型"></a>GO1.18新特性-泛型</h1><p>泛型（<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cnblogs.com/kevinwan/p/16223984.html%EF%BC%89">https://www.cnblogs.com/kevinwan/p/16223984.html）</a></p>
+<h1 id="hashMap原理"><a href="#hashMap原理" class="headerlink" title="hashMap原理"></a>hashMap原理</h1><p>参考下面两位大神:</p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://zhuanlan.zhihu.com/p/495998623">https://zhuanlan.zhihu.com/p/495998623</a></p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://eddycjy.gitbook.io/golang/di-7-ke-shu-ju-jie-gou/map-access">https://eddycjy.gitbook.io/golang/di-7-ke-shu-ju-jie-gou/map-access</a></p>
+<p>HashMap基础结构如下：<br><img src=https://img.ncfl.tech/202403152122367.png width=600px/></p>
+<ul>
+<li>B决定了<code>bmap</code>的个数，进而map所能存储的数据大小</li>
+<li>Key hash之后的后B为，决定了数据在哪个<code>bmap</code>中，头8位决定了在哪个</li>
+<li>tophash保存键hash之后的头8位，先比较tophash是否相同，如果不同，则不用比较了，如果相同再去比较真正的Key是否相同，O(1)复杂度的原因</li>
+<li>bmap中的数据保存结构为<code>k/k/k/k/v/v/v/v</code>，不是<code>k/v/k/v/k/v/k/v</code>,因为<code>k</code>一般比较小，这样可以更省空间</li>
+<li>用链表的方式解决hash冲突，指向下一个<code>bmap</code>(java采用的是数组解决，数组大了用红黑树)</li>
+<li>map是协程不安全的，可以通过自己加锁或者<code>sync.map</code>来保证安全性</li>
+</ul>
+<br/>
+
+<ul>
+<li>下列每次操作都不加锁，所以非线程协程安全</li>
+<li>GET:hash之后取根据后B位判断<code>bmap</code>，在根据前8位去<code>bmap</code>重查找，当前<code>bmap</code>无则去<code>overflow</code>中查找，若均无，则返回空</li>
+<li>PUT:同GET，在GET过程中，记录下第一个空位，如果GET返回不为空，则更新，如果为空，则在第一个空位插入数据，如果无空位，则创建一个<code>bmap</code>作为溢出</li>
+</ul>
+<h2 id="怎么解决hash冲突"><a href="#怎么解决hash冲突" class="headerlink" title="怎么解决hash冲突"></a>怎么解决hash冲突</h2><p>用链表的方式解决hash冲突，指向下一个<code>bmap</code>(java采用的是数组解决，数组大了用红黑树)</p>
+<h2 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h2><h3 id="等量扩容"><a href="#等量扩容" class="headerlink" title="等量扩容"></a>等量扩容</h3><p>随着不断的增删元素，会导致<code>bmap</code>的<code>overflow</code>很多，但是元素却不多，这个时候会把<code>overflow</code>的元素迁移到前面,删除多余的<code>overflow</code>，等价于紧缩map，桶的个数不会增加</p>
+<p>时机：好像是一个bit位，<code>sameSizeGrow</code>这个比特位,没太看懂</p>
+<h3 id="增量扩容"><a href="#增量扩容" class="headerlink" title="增量扩容"></a>增量扩容</h3><ul>
+<li><p><code>负载因子</code>为6.5（固定值），<code>负载因子</code> &#x3D; 元素总个数 &#x2F; 桶的个数 ，即平均每个桶中元素个数 &#x2F; 8</p>
+</li>
+<li><p>渐进式扩容：增加元素的时候，判断<code>负载因子</code> ，当需要扩容时，创建新的<code>buckets</code>，但是不会去初始化内存，只是预留，<code>oldbuckets</code>指向当前数据，然后只把当前值迁移到新的<code>buckets</code>，后续每操作一个数据迁移一个数据</p>
+<ul>
+<li>加快响应速度，避免因为全局桶的迁移，导致Map性能降低</li>
+<li>扩容过程中遇到如果发现还要扩容，则强制执行完当前的扩容，再进行下次扩容</li>
+<li>B &lt; 15，扩容为double，B &gt;&#x3D; 15，扩容为2^15</li>
+</ul>
+</li>
+</ul>
+<h2 id="为什么是无序的"><a href="#为什么是无序的" class="headerlink" title="为什么是无序的"></a>为什么是无序的</h2><p>生成了随机数。用于决定从哪里开始循环迭代。更具体的话就是根据随机数，选择一个桶位置作为起始点进行遍历迭代，因此每次重新<code>for range map</code>，见到的结果都是不一样的</p>
+<h1 id="GO的堆栈图"><a href="#GO的堆栈图" class="headerlink" title="GO的堆栈图"></a>GO的堆栈图</h1><h1 id="GO1-18新特性-泛型"><a href="#GO1-18新特性-泛型" class="headerlink" title="GO1.18新特性-泛型"></a>GO1.18新特性-泛型</h1><p>泛型（<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cnblogs.com/kevinwan/p/16223984.html%EF%BC%89">https://www.cnblogs.com/kevinwan/p/16223984.html）</a></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 方法</span><br><span class="line">func A[T Numeric, T2 Node[int]]() (T, T2) &#123;</span><br><span class="line">	n := T2&#123;value: 1&#125;</span><br><span class="line">	return 1, n</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type Numeric interface &#123;</span><br><span class="line">	int | float32 | float64 | int32</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type Node[T any] struct &#123;</span><br><span class="line">	value T</span><br><span class="line">&#125;</span><br><span class="line">// 定义类型</span><br><span class="line">type NodeCompare[T Numeric] struct &#123;</span><br><span class="line">	value T</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>使用场景：</p>
@@ -230,7 +263,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-03-14 22:45:51
+              2024-03-18 20:58:57
             </span>
             
                   <span class="post-tags">
@@ -264,7 +297,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-text">垃圾回收机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="toc-text">内存对齐</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BGMP-%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">内存模型GMP(调度器)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="toc-text">背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="toc-text">优势：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8%EF%BC%9A"><span class="toc-text">老的调度器：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">新的调度器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#hashMap%E5%8E%9F%E7%90%86"><span class="toc-text">hashMap原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3hash%E5%86%B2%E7%AA%81"><span class="toc-text">怎么解决hash冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#refresh%E6%9C%BA%E5%88%B6"><span class="toc-text">refresh机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hash%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-text">hash冲突解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO%E7%9A%84%E5%A0%86%E6%A0%88%E5%9B%BE"><span class="toc-text">GO的堆栈图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-18%E6%96%B0%E7%89%B9%E6%80%A7-%E6%B3%9B%E5%9E%8B"><span class="toc-text">GO1.18新特性-泛型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-20%E6%96%B0%E7%89%B9%E6%80%A7-slice%E8%BD%AC%E6%95%B0%E7%BB%84%EF%BC%8C%E4%BD%86%E6%98%AF%E4%BC%9A%E6%8C%87%E5%90%91%E5%90%8C%E4%B8%80%E4%B8%AA%E5%9C%B0%E5%9D%80"><span class="toc-text">GO1.20新特性-slice转数组，但是会指向同一个地址</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-text">垃圾回收机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="toc-text">内存对齐</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BGMP-%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">内存模型GMP(调度器)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="toc-text">背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="toc-text">优势：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8%EF%BC%9A"><span class="toc-text">老的调度器：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">新的调度器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#hashMap%E5%8E%9F%E7%90%86"><span class="toc-text">hashMap原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3hash%E5%86%B2%E7%AA%81"><span class="toc-text">怎么解决hash冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9"><span class="toc-text">扩容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%89%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">等量扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">增量扩容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A0%E5%BA%8F%E7%9A%84"><span class="toc-text">为什么是无序的</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO%E7%9A%84%E5%A0%86%E6%A0%88%E5%9B%BE"><span class="toc-text">GO的堆栈图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-18%E6%96%B0%E7%89%B9%E6%80%A7-%E6%B3%9B%E5%9E%8B"><span class="toc-text">GO1.18新特性-泛型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GO1-20%E6%96%B0%E7%89%B9%E6%80%A7-slice%E8%BD%AC%E6%95%B0%E7%BB%84%EF%BC%8C%E4%BD%86%E6%98%AF%E4%BC%9A%E6%8C%87%E5%90%91%E5%90%8C%E4%B8%80%E4%B8%AA%E5%9C%B0%E5%9D%80"><span class="toc-text">GO1.20新特性-slice转数组，但是会指向同一个地址</span></a></li></ol>
       
     </div>
   </div>

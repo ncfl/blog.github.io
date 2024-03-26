@@ -11,7 +11,7 @@
   
   <title>
     
-      数据结构 
+      树结构 
       
       
       |
@@ -146,16 +146,97 @@
   <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
   <div class="container post-details" id="post-details">
     <div class="post-content">
-      <div class="post-title">数据结构</div>
+      <div class="post-title">树结构</div>
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-03-18 21:17:45
+          2024-03-26 21:33:55
         </span>
         
       </div>
       <div class="markdown-body">
-        <h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><h2 id="B树、B-树"><a href="#B树、B-树" class="headerlink" title="B树、B+树"></a>B树、B+树</h2>
+        <p>所有树的基础比较，见：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/weixin_37645838/article/details/82778923">https://blog.csdn.net/weixin_37645838/article/details/82778923</a></p>
+<h1 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h1><p>二叉树没啥好说的，就是树</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type TreeNode struct &#123;</span><br><span class="line">	Val   int</span><br><span class="line">	Left  *TreeNode</span><br><span class="line">	Right *TreeNode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>N叉树同上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type TreeNode struct &#123;</span><br><span class="line">	Val   int</span><br><span class="line">	Node  []*TreeNode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="二叉搜索树"><a href="#二叉搜索树" class="headerlink" title="二叉搜索树"></a>二叉搜索树</h1><p>在二插树的基础上，保障左节点的值都小于当前节点，有节点的值都大于当前节点</p>
+<img src=https://img.ncfl.tech/202403252055731.webp width=300px/>
+
+<p>理想情况下如上图，但是不理想的情况下可能会变成下图，此时复杂度为O(N)，与链表无异</p>
+<img src=https://img.ncfl.tech/202403252100175.webp width=300px/>
+
+<h1 id="AVL树，平衡二叉树"><a href="#AVL树，平衡二叉树" class="headerlink" title="AVL树，平衡二叉树"></a>AVL树，平衡二叉树</h1><p>在二叉搜索树的基础上，保证左子树和右子树的深度差不大于1。就是类似下面这个图</p>
+<img src=https://img.ncfl.tech/202403252055731.webp width=300px/>
+
+<ul>
+<li>好处：查找的时候，复杂度O(logN)</li>
+<li>坏处：插入删除的时候，为了保证深度差不大于1，需要不断旋转树，虽然复杂度也是O(logN)，但是次数太多了</li>
+</ul>
+<h1 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h1><p>在二叉搜索树的基础上，保证左子树和右子树的深度差不多，和AVL最大的区别就是红黑树可能会出现左右差2,3的情况。就是类似下面这个图，最大最大的好处就是*** 增删改查的复杂度都为O(logN) ***</p>
+<img src=https://img.ncfl.tech/202403252105927.jpg width=300px/>
+
+<p>红黑树的增删有点费劲，主要是参考下面两篇文章：<br><a target="_blank" rel="noopener external nofollow noreferrer" href="https://segmentfault.com/a/1190000020118044#articleHeader0">https://segmentfault.com/a/1190000020118044#articleHeader0</a><br><a target="_blank" rel="noopener external nofollow noreferrer" href="https://my.oschina.net/u/3272058/blog/1914452">https://my.oschina.net/u/3272058/blog/1914452</a></p>
+<p>插入动画可以在 <a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cs.usfca.edu/~galles/visualization/RedBlack.html">https://www.cs.usfca.edu/~galles/visualization/RedBlack.html</a> 自己去玩</p>
+<h2 id="红黑树的特点"><a href="#红黑树的特点" class="headerlink" title="红黑树的特点"></a>红黑树的特点</h2><ul>
+<li>每个节点非红即黑； </li>
+<li>根节点是黑的； </li>
+<li>每个叶节点(叶节点即树尾端NULL指针或NULL节点)都是黑的； </li>
+<li>如果一个节点是红的,那么它的两儿子都是黑的； </li>
+<li>对于任意节点而言，其到叶子点树NULL指针的每条路径都包含相同数目的黑节点； </li>
+<li>每条路径都包含相同的黑节点；</li>
+</ul>
+<h2 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h2><p>这里不用太学术的话术来讲，比较学术的话，参考上面两篇文章</p>
+<ol>
+<li>插入的节点都标记为红色</li>
+<li>根据不同的情况做不同的处理，主要为一下5种，直接上图</li>
+</ol>
+<ul>
+<li><p>uncle为红色情况：直接把uncle和parent变成黑色的</p>
+<img src=https://img.ncfl.tech/202403252113687.webp width=500px/>
+</li>
+<li><p>左左情况：uncle为黑色的情况且插入左侧，则提起parent，然后变色即可</p>
+<img src=https://img.ncfl.tech/202403252114841.webp width=500px/>
+</li>
+<li><p>左右情况：uncle为黑色的情况且插入右侧，则son parent交换一下关系，变成左左情况，然后再执行左左情况</p>
+<img src=https://img.ncfl.tech/202403252114622.webp width=500px/>
+</li>
+<li><p>右右情况：uncle为黑色的情况且插入右侧，同左左，提起parent，然后变色即可</p>
+<img src=https://img.ncfl.tech/202403252115653.webp width=500px/>
+</li>
+<li><p>右左情况：uncle为黑色的情况且插入左侧，则son parent交换一下关系，变成右右情况，然后再执行右右情况</p>
+<img src=https://img.ncfl.tech/202403252115110.webp width=500px/></li>
+</ul>
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><p>见<a target="_blank" rel="noopener external nofollow noreferrer" href="https://my.oschina.net/u/3272058/blog/1914452">https://my.oschina.net/u/3272058/blog/1914452</a></p>
+<h1 id="B树"><a href="#B树" class="headerlink" title="B树"></a>B树</h1><p>B树就是N叉树中的一种，数据完整信息保存在节点中。</p>
+<p>N叉树相对于二叉树，树的深度会小很多，便利的次数也会小很多，进而效率更高。</p>
+<p><em><strong>mongodb用的不是B树，是B+树</strong></em>，看看<a target="_blank" rel="noopener external nofollow noreferrer" href="https://zhuanlan.zhihu.com/p/519658576">https://zhuanlan.zhihu.com/p/519658576</a></p>
+<p>动画演示见：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cs.usfca.edu/~galles/visualization/BTree.html">https://www.cs.usfca.edu/~galles/visualization/BTree.html</a></p>
+<h2 id="插入-1"><a href="#插入-1" class="headerlink" title="插入"></a>插入</h2><img src=https://img.ncfl.tech/202403262131041.jpg width=700px/>
+
+<h2 id="删除-1"><a href="#删除-1" class="headerlink" title="删除"></a>删除</h2><img src=https://img.ncfl.tech/202403262133490.jpg width=700px/>
+
+<h2 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h2><ul>
+<li>单一查找更方便，更快速的返回，查到节点就直接返回，避免继续索引</li>
+<li>范围查找不友好</li>
+</ul>
+<h1 id="B-树"><a href="#B-树" class="headerlink" title="B+树"></a>B+树</h1><p>B+树就是N叉树中的一种，数据完整信息都保存在叶子节点中，非叶子节点仅保存数据的索引。</p>
+<p>N叉树相对于二叉树，树的深度会小很多，便利的次数也会小很多，进而效率更高。</p>
+<p>相对于B树，B+树还是吧所有的叶子节点通过指针关联起来</p>
+<p>mysql用的是B+树，<em><strong>mongodb用的也是B+树</strong></em></p>
+<p>动画演示见：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html</a></p>
+<h2 id="插入-2"><a href="#插入-2" class="headerlink" title="插入"></a>插入</h2><img src=https://img.ncfl.tech/202403252357088.jpg width=700px/>
+
+<h2 id="删除-2"><a href="#删除-2" class="headerlink" title="删除"></a>删除</h2><img src=https://img.ncfl.tech/202403260001948.jpg width=700px/>
+
+<h2 id="好处-1"><a href="#好处-1" class="headerlink" title="好处"></a>好处</h2><ul>
+<li>B+树的磁盘读写的代价更低：B+树的节点只记录值，类似索引，不记录其他信息，一次可以IO更多的节点出来（磁盘的寻道操作更少，IO也更少）</li>
+<li>B+树的查询更加的稳定：每次都是到根节点才操作数据，查询长度速度稳定</li>
+<li>B+树的查询更适合做范围查找：查询到根节点之后，直接从当前节点往后遍历即可，不用再去查找树</li>
+</ul>
+<h1 id="B-树-1"><a href="#B-树-1" class="headerlink" title="B*树"></a>B*树</h1><p>是B+树的变体，在B+树的非根和非叶子结点再增加指向兄弟的指针；</p>
+<h1 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h1>
       </div>
       
         <div class="prev-or-next">
@@ -170,11 +251,16 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-03-18 21:17:45
+              2024-03-26 21:33:55
             </span>
             
           </div>
           <div class="post-foot-prev">
+            
+              <a href="/post/243/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
             
           </div>
         </div>
@@ -188,7 +274,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A0%86"><span class="toc-text">堆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-text">二叉树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#B%E6%A0%91%E3%80%81B-%E6%A0%91"><span class="toc-text">B树、B+树</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-text">二叉树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91"><span class="toc-text">二叉搜索树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AVL%E6%A0%91%EF%BC%8C%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-text">AVL树，平衡二叉树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-text">红黑树</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-text">红黑树的特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E5%85%A5"><span class="toc-text">插入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A0%E9%99%A4"><span class="toc-text">删除</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#B%E6%A0%91"><span class="toc-text">B树</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E5%85%A5-1"><span class="toc-text">插入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-1"><span class="toc-text">删除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#B-%E6%A0%91"><span class="toc-text">B+树</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%92%E5%85%A5-2"><span class="toc-text">插入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-2"><span class="toc-text">删除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84-1"><span class="toc-text">好处</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#B-%E6%A0%91-1"><span class="toc-text">B*树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A0%86"><span class="toc-text">堆</span></a></li></ol>
       
     </div>
   </div>

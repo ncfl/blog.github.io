@@ -1,7 +1,8 @@
+https://blog.ncfl.tech/post/243/
+https://blog.ncfl.tech/post/1106/
+https://blog.ncfl.tech/post/54150/
 https://blog.ncfl.tech/post/60576/
 https://blog.ncfl.tech/post/2905/
-https://blog.ncfl.tech/post/54150/
-https://blog.ncfl.tech/post/1106/
 https://blog.ncfl.tech/post/30374/
 https://blog.ncfl.tech/post/37969/
 https://blog.ncfl.tech/post/4526/
@@ -85,5 +86,6 @@ https://blog.ncfl.tech/tags/nginx/
 https://blog.ncfl.tech/tags/redis/
 https://blog.ncfl.tech/tags/leetcode/
 https://blog.ncfl.tech/categories/go/
+https://blog.ncfl.tech/categories/mysql/
 https://blog.ncfl.tech/categories/%E9%9D%A2%E8%AF%95/
 https://blog.ncfl.tech/categories/leetcode/

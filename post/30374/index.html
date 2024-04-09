@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-03-29 00:13:53
+          2024-04-03 20:07:43
         </span>
         
               <span class="post-tags">
@@ -237,30 +237,21 @@ zset   -  压缩链表、跳表
 <li>订阅mysql的binlog，进而达到数据最终一致性</li>
 </ul>
 </li>
-<li>需要更加引用第三方的组件，增加的维护成本和系统的不确定性，但是①这样可以快速达到数据的一致性，且同时两个组件发生问题的概率不大，且都自带重试机制②引入缓存是为了加快系统的响应，且mysql底层由于隔离机制的问题，也可能导致数据的不一致性，如果要既要追求性能，也要保证实时一致，几乎是不可能的。③由于CAP理论，强一致性和高可用是无法同时满足的，强一致性可以通过数据库的<code>Serializable</code>，或者redis加锁，或者<code>raft</code> <code>Paxos</code>等实现，但是性能都不佳</li>
 </ul>
 </li>
 </ul>
+<p>    - 需要更加引用第三方的组件，增加的维护成本和系统的不确定性，但是①这样可以快速达到数据的一致性，且同时两个组件发生问题的概率不大，且都自带重试机制②引入缓存是为了加快系统的响应，且mysql底层由于隔离机制的问题，也可能导致数据的不一致性，如果要既要追求性能，也要保证实时一致，几乎是不可能的。③一致性可以通过数据库的<code>Serializable</code>，或者redis加锁，或者<code>raft</code> <code>Paxos</code>等实现，但是性能都不佳</p>
 <h2 id="强一致性算法"><a href="#强一致性算法" class="headerlink" title="强一致性算法"></a>强一致性算法</h2><h3 id="拜占庭问题"><a href="#拜占庭问题" class="headerlink" title="拜占庭问题"></a>拜占庭问题</h3><p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.youtube.com/watch?v=e9KVmyI1eCg&t=1066s">https://www.youtube.com/watch?v=e9KVmyI1eCg&amp;t=1066s</a></p>
 <p>多个人去攻打一座城，超过半数的人去打才能打赢，几个人一起讨论下要不要攻打。<br><img src=https://img.ncfl.tech/202403282352574.jpg width=700px/></p>
 <h3 id="ZAB-raft-Paxos视频"><a href="#ZAB-raft-Paxos视频" class="headerlink" title="ZAB raft Paxos视频"></a>ZAB raft Paxos视频</h3><p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.bilibili.com/video/BV1TW411M7Fx/?spm_id_from=333.337.search-card.all.click&vd_source=5049cdb7864cfa3b2891e8ab98480c55">https://www.bilibili.com/video/BV1TW411M7Fx/?spm_id_from=333.337.search-card.all.click&amp;vd_source=5049cdb7864cfa3b2891e8ab98480c55</a></p>
 <ul>
-<li>Paxos，核心难点，实现起来太复杂了<ul>
-<li><p>basic paxos，实现复杂，效率低(2次RPC)，存在提案竞争问题，即活锁问题</p>
-<img src=https://img.ncfl.tech/202403282355173.jpg width=700px/>
-</li>
-<li><p>multi paxos，选出提案者（leader），避免活锁</p>
-</li>
-</ul>
-</li>
-</ul>
-<img src=https://img.ncfl.tech/202403290002914.jpg width=700px/>    
-
-<pre><code>- multi paxos，leader也可以投票，其他与上差别不大
-</code></pre>
-<img src=https://img.ncfl.tech/202403290005997.jpg width=700px/>   
-
+<li><p>Paxos，核心难点，实现起来太复杂了</p>
 <ul>
+<li>basic paxos，实现复杂，效率低(2次RPC)，存在提案竞争问题，即活锁问题<img src=https://img.ncfl.tech/202403282355173.jpg width=700px/></li>
+<li>multi paxos，选出提案者（leader），避免活锁<img src=https://img.ncfl.tech/202403290002914.jpg width=700px/>    </li>
+<li>multi paxos，leader也可以投票，其他与上差别不大<img src=https://img.ncfl.tech/202403290005997.jpg width=700px/></li>
+</ul>
+</li>
 <li><p>Raft：</p>
 <ul>
 <li>图解1：<a target="_blank" rel="noopener external nofollow noreferrer" href="http://thesecretlivesofdata.com/raft/">http://thesecretlivesofdata.com/raft/</a></li>
@@ -276,7 +267,168 @@ zset   -  压缩链表、跳表
 </ul>
 </li>
 </ul>
-<h1 id="RDB-amp-AOF区别"><a href="#RDB-amp-AOF区别" class="headerlink" title="RDB &amp; AOF区别"></a>RDB &amp; AOF区别</h1><h1 id="缓存雪崩、击穿、穿透"><a href="#缓存雪崩、击穿、穿透" class="headerlink" title="缓存雪崩、击穿、穿透"></a>缓存雪崩、击穿、穿透</h1><h1 id="redis快的原因"><a href="#redis快的原因" class="headerlink" title="redis快的原因"></a>redis快的原因</h1><h1 id="几个常用库区别"><a href="#几个常用库区别" class="headerlink" title="几个常用库区别"></a>几个常用库区别</h1>
+<h1 id="RDB-amp-AOF区别"><a href="#RDB-amp-AOF区别" class="headerlink" title="RDB &amp; AOF区别"></a>RDB &amp; AOF区别</h1><p>主要参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://zhuanlan.zhihu.com/p/340082703">https://zhuanlan.zhihu.com/p/340082703</a></p>
+<h2 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h2><p>定义：基于配置，每间隔一段时间或者一些操作之后，把当前redis的快照压缩后写入磁盘</p>
+<p>相关配置类似：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">save 900 1 #在900秒(15分钟)之后，如果至少有1个key发生变化，则dump内存快照。</span><br><span class="line">save 300 10 #在300秒(5分钟)之后，如果至少有10个key发生变化，则dump内存快照。</span><br><span class="line">save 60 10000 #在60秒(1分钟)之后，如果至少有10000个key发生变化，则dump内存快照。</span><br></pre></td></tr></table></figure>
+
+<p>如果rdb过程中发生了写操作怎么办（COW(copy on write–和关注重构联系一下)）：</p>
+<ul>
+<li>数据在执行rdb的时候，是生成快照的，如果是读请求，则正常读即可，如果是写请求，则写请求会将当前数据拷贝到一块新的内存来做操作。故执行rdb的时候，保存的就是那一瞬间的快照数据</li>
+</ul>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ul>
+<li>备份文件简单，只有一个文件，且文件较精简</li>
+<li>数据迁移和数据恢复比较快，直接拷贝这个文件。因为是数据快照，直接放到内存即可</li>
+<li>对性能影响较小，只有在特定时间才执行一次，其他时间无影响</li>
+</ul>
+<h3 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h3><ul>
+<li>可能存在数据丢失，毕竟rdb的频次不是很高，数据丢失的时间期间可能比较长</li>
+<li>数据量较大时，rdb做数据备份会占用较长的时间，那一瞬间，对请求的读写也会有影响</li>
+</ul>
+<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>定义：记录redis的所有写操作，保存在持久化文件中</p>
+<p>相关配置如下：（因为不是直接写入文件，是写入到linux的缓存区，下列配置为从缓存区刷新到文件的时间间隔）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendfsync always #每次有数据修改发生时都会写入AOF文件。数据最安全，性能影响最大</span><br><span class="line">appendfsync everysec #每秒钟同步一次，该策略为AOF的缺省策略。可能是缺少1s的数据</span><br><span class="line">appendfsync no #从不同步，由操作系统决定何时刷新到文件。性能影响最小，数据安全性最差</span><br></pre></td></tr></table></figure>
+
+<h3 id="优势-1"><a href="#优势-1" class="headerlink" title="优势"></a>优势</h3><ul>
+<li>基于上面不同的策略，可以选择实时性很高的持久化方式，基本上可以保证数据的完整性</li>
+<li>可以基于aof文件分析数据的操作过程等，可用于逻辑复现等</li>
+</ul>
+<h3 id="劣势-1"><a href="#劣势-1" class="headerlink" title="劣势"></a>劣势</h3><ul>
+<li>备份文件较大，大于rdb</li>
+<li>备份文件恢复较慢，慢于rdb</li>
+<li>在redis写操作的时候，需要插入aof的执行，故对性能有一定影响</li>
+</ul>
+<h2 id="混合持久化"><a href="#混合持久化" class="headerlink" title="混合持久化"></a>混合持久化</h2><p>即是AOF + RDB一起做持久化，高版本默认开启</p>
+<h3 id="执行过程"><a href="#执行过程" class="headerlink" title="执行过程"></a>执行过程</h3><p>基于类似下面的配置情况，会有一个叫做<code>AOF重写</code>的过程，在执行改操作的时候，就是混合持久化，当前的数据会做一次RDB快照，然后再把最新的数据用AOF记录起来。最后生成文件格式大致为<code>[RDB file][AOF tail]</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 当前AOF文件比上次重写后的AOF文件大小的增长比例超过100 </span><br><span class="line">auto-aof-rewrite-percentage 100  </span><br><span class="line">// 当前AOF文件的文件大小大于64MB </span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure>
+
+<h3 id="优劣势，就是双方的整合"><a href="#优劣势，就是双方的整合" class="headerlink" title="优劣势，就是双方的整合"></a>优劣势，就是双方的整合</h3><ul>
+<li>文件比RDB大，比aof小</li>
+<li>rdb部分确定和rdb一样，可读性差。AOF部分文件可读性好，利用率不好，但是其实这部分数据量应该不大</li>
+<li>数据恢复的时候，因为前半部分采用了RDB，恢复得快。</li>
+</ul>
+<h1 id="缓存雪崩、击穿、穿透"><a href="#缓存雪崩、击穿、穿透" class="headerlink" title="缓存雪崩、击穿、穿透"></a>缓存雪崩、击穿、穿透</h1><p>主要是基于<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.xiaolincoding.com/redis/cluster/cache_problem.html">https://www.xiaolincoding.com/redis/cluster/cache_problem.html</a></p>
+<img src=https://img.ncfl.tech/202404022113933.webp width=600px/>
+
+<img src=https://img.ncfl.tech/202404022117083.webp width=600px/>
+
+<p>tips: 布隆过滤器存在误判的情况，所以和限流器等一样，也只是起到一个削峰的作用，无法完全避免无用请求直接打到下游</p>
+<h1 id="redis单线程多线程"><a href="#redis单线程多线程" class="headerlink" title="redis单线程多线程"></a>redis单线程多线程</h1><p>老版本都是单线程，新版本默认是多线程。（这里指的是命令的执行，RDB，aof等操作自然是由额外的线程处理的）</p>
+<h2 id="引入多线程的原因"><a href="#引入多线程的原因" class="headerlink" title="引入多线程的原因"></a>引入多线程的原因</h2><ul>
+<li>内存和CPU都是本地操作，耗时一般很低。但是客户端和服务端的网络的IO可能成为系统的瓶颈（IO多路复用）</li>
+<li>如果执行的命令是耗时操作，则可能导致redis相应变慢</li>
+</ul>
+<h2 id="多线程应用"><a href="#多线程应用" class="headerlink" title="多线程应用"></a>多线程应用</h2><ul>
+<li>建立客户端与服务端链接的时候，每个线程处理一个链接，然后把建立成功的链接放在一个队列中，主线程（真正去执行命令的线程）从队列中取出数据执行。</li>
+<li>在执行耗时命令的时候，有对应的多线程命令用以处理。（执行过程中会加锁，避免其他的值过来修改）（del – unlink）(flushdb – flushdb async)(flushall – flushall async)</li>
+</ul>
+<h2 id="IO多路复用技术"><a href="#IO多路复用技术" class="headerlink" title="IO多路复用技术"></a>IO多路复用技术</h2><p>核心参考：<br><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.jianshu.com/p/1b4b3c738d8c">https://www.jianshu.com/p/1b4b3c738d8c</a><br><a target="_blank" rel="noopener external nofollow noreferrer" href="https://juejin.cn/post/6882984260672847879#heading-10">https://juejin.cn/post/6882984260672847879#heading-10</a></p>
+<p>数据从内核态拷贝到用户态，需要经历两个流程</p>
+<ul>
+<li>询问内核态数据是否准备好了</li>
+<li>将数据从内核态拷贝到用户态</li>
+</ul>
+<h3 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h3><img src=https://img.ncfl.tech/202404031936740.webp width=600px/>
+仅处理单个IO，数据从内核态拷贝到用户态持续阻塞，直到内核空间准备好了为止
+
+<h3 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h3><img src=https://img.ncfl.tech/202404031940499.webp width=600px/>
+仅处理单个IO，不断询问内核空间是否准备好，未准备好则返回错误，继续询问，直到内核空间准备好，才将数据从内核态拷贝到用户态
+
+<h3 id="select"><a href="#select" class="headerlink" title="select"></a>select</h3><img src=https://img.ncfl.tech/202404031942683.webp width=600px/>
+处理多个IO，向内核空间发起询问的时候，此时是阻塞住，内核空间会把当前select负责的所有都查看一遍，返回已经ready的IO。也是不断轮询。与NIO有点像，不过NIO仅负责一个，select负责一批
+
+<h3 id="poll"><a href="#poll" class="headerlink" title="poll"></a>poll</h3><p>与select基本相同，除了部分实现和结构不同，其他基本一致。见下表</p>
+<h3 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h3><p>没有找到图。。。</p>
+<p>基于事件回调的处理方式，也是分成两个部分，应用程序调用内核的后，便不用管了，待内核空间准备好了，将事件扔进队列里面，应用程序仅需从队列中取数据即可。避免了不断询问的过程</p>
+<h3 id="形象图解"><a href="#形象图解" class="headerlink" title="形象图解"></a>形象图解</h3><p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://php-note.com/1636.html">https://php-note.com/1636.html</a></p>
+<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>select</strong></th>
+<th><strong>poll</strong></th>
+<th><strong>epoll</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>操作方式</strong></td>
+<td>遍历</td>
+<td>遍历</td>
+<td>回调</td>
+</tr>
+<tr>
+<td><strong>数据结构</strong></td>
+<td>bitmap</td>
+<td>数组</td>
+<td>红黑树</td>
+</tr>
+<tr>
+<td><strong>最大连接数</strong></td>
+<td>1024（x86）或 2048（x64）</td>
+<td>无上限</td>
+<td>无上限</td>
+</tr>
+<tr>
+<td><strong>最大支持文件描述符数</strong></td>
+<td>一般有最大值限制</td>
+<td>65535</td>
+<td>65535</td>
+</tr>
+<tr>
+<td><strong>fd拷贝</strong></td>
+<td>每次调用select，都需要把fd集合从用户态拷贝到内核态</td>
+<td>每次调用poll，都需要把fd集合从用户态拷贝到内核态</td>
+<td>fd首次调用epoll_ctl拷贝，每次调用epoll_wait不拷贝</td>
+</tr>
+<tr>
+<td><strong>工作效率</strong></td>
+<td>每次调用都进行线性遍历，时间复杂度为O(n)</td>
+<td>每次调用都进行线性遍历，时间复杂度为O(n)</td>
+<td>事件通知方式，每当fd就绪，系统注册的回调函数就会被调用，将就绪fd放到readyList里面，时间复杂度O(1)</td>
+</tr>
+</tbody></table>
+<h1 id="redis快的原因"><a href="#redis快的原因" class="headerlink" title="redis快的原因"></a>redis快的原因</h1><ul>
+<li>存内存操作，速度快</li>
+<li>优质且定制化的数据结构优化</li>
+<li>主线程单线程执行，避免上下文切换，多线程竞争</li>
+<li>多路复用技术（BIO，NIO，select，poll，epoll），采用多线程较少客户端和服务端建立链接的时间gap，针对耗时操作，多线程处理</li>
+</ul>
+<h1 id="看门狗机制"><a href="#看门狗机制" class="headerlink" title="看门狗机制"></a>看门狗机制</h1><p>执行一个任务的时候，可能会基于redis做一个加锁的操作，但是可能该任务还没有执行完，锁便到期了，这时候如果有其他线程处理可能就会有问题。</p>
+<p>看门狗即是在这个锁还在的时候续期这个锁，等待主线程主动释放该锁</p>
+<h1 id="redis内存淘汰策略"><a href="#redis内存淘汰策略" class="headerlink" title="redis内存淘汰策略"></a>redis内存淘汰策略</h1><p>内存满了的时候，根据配置执行不同的策略</p>
+<p>（所有的key，有过期的key并不是维护全量的key，那样成本太高了，而是基于配置的数量N，仅维护N长度的可能会被淘汰的key）</p>
+<ul>
+<li>Noeviction：默认策略，永不淘汰。除del等删除指令的写请求，直接return err</li>
+<li>Allkeys_LRU：所有key，做最近最少使用（Least Recently Used）淘汰，基于使用顺序淘汰</li>
+<li>Volatile_LRU：有过期时间的key，做最近最少使用（Least Recently Used）淘汰，基于使用顺序淘汰</li>
+<li>Allkeys_LFU：所有key，做最近最不经常使用（Least Frequency Used）淘汰，基于使用次数淘汰</li>
+<li>Volatile_LFU：有过期时间的key，做最近最不经常使用（Least Frequency Used）淘汰，基于使用次数淘汰</li>
+<li>Allkeys_Random：所有key，随机淘汰</li>
+<li>Volatile_Random：有过期时间的key，随机淘汰</li>
+<li>Volatile_TTL：有过期时间的key，选择剩余时间最少得淘汰</li>
+</ul>
+<h1 id="过期的key怎么删除"><a href="#过期的key怎么删除" class="headerlink" title="过期的key怎么删除"></a>过期的key怎么删除</h1><p><em><strong>目前redis默认采用的是惰性删除和定期删除的两种策略结合</strong></em></p>
+<ul>
+<li>定时删除<ul>
+<li>在写入有过期时间key的时候，创建一个定时任务用来删除key</li>
+<li>优点：内存友好，过期即可立刻删除</li>
+<li>缺点：CPU不友好，需要时刻监听删除任务事件</li>
+</ul>
+</li>
+<li>惰性删除<ul>
+<li>访问到数据的时候，如果发现该key已经过期了，则删除</li>
+<li>优点：CPU友好，只有在访问的时候才进行操作</li>
+<li>缺点：内存不友好，可能该key长时间不访问，则无法删除该key</li>
+</ul>
+</li>
+<li>定期删除<ul>
+<li>通过配置，每个1秒钟执行N次，随机捞取M个key，判断key是否过期，过期则删除</li>
+<li>优点：相对于定时删除，CPU友好，几乎不会额外占用高CPU资源，取决于配置。相对于惰性删除，可以删除长时间不访问的key</li>
+<li>缺点：需要手动调优，频率太高，则类似定时删除，频率太低，则类似惰性删除</li>
+</ul>
+</li>
+</ul>
+<h1 id="一致性hash算法扩缩容"><a href="#一致性hash算法扩缩容" class="headerlink" title="一致性hash算法扩缩容"></a>一致性hash算法扩缩容</h1><h1 id="哨兵模式"><a href="#哨兵模式" class="headerlink" title="哨兵模式"></a>哨兵模式</h1><h1 id="几个常用库区别"><a href="#几个常用库区别" class="headerlink" title="几个常用库区别"></a>几个常用库区别</h1>
       </div>
       
         <div class="prev-or-next">
@@ -291,7 +443,7 @@ zset   -  压缩链表、跳表
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-03-29 00:13:53
+              2024-04-03 20:07:43
             </span>
             
                   <span class="post-tags">
@@ -325,7 +477,7 @@ zset   -  压缩链表、跳表
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="toc-text">数据结构有哪些</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SDS"><span class="toc-text">SDS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8%EF%BC%88linkedlist%EF%BC%89"><span class="toc-text">双向链表（linkedlist）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9%E9%93%BE%E8%A1%A8%EF%BC%88ziplist%EF%BC%89"><span class="toc-text">压缩链表（ziplist）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E8%A1%A8"><span class="toc-text">哈希表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%B3%E8%A1%A8"><span class="toc-text">跳表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#quickList%EF%BC%88%E6%9A%82%E6%97%B6%E4%B8%8D%E8%80%83%EF%BC%89"><span class="toc-text">quickList（暂时不考）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E5%AF%B9%E5%BA%94%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text">命令对应的复杂度</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-redis%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">mysql redis数据一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%EF%BC%9A"><span class="toc-text">核心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88"><span class="toc-text">方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95"><span class="toc-text">强一致性算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%97%AE%E9%A2%98"><span class="toc-text">拜占庭问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB-raft-Paxos%E8%A7%86%E9%A2%91"><span class="toc-text">ZAB raft Paxos视频</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RDB-amp-AOF%E5%8C%BA%E5%88%AB"><span class="toc-text">RDB &amp; AOF区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9%E3%80%81%E5%87%BB%E7%A9%BF%E3%80%81%E7%A9%BF%E9%80%8F"><span class="toc-text">缓存雪崩、击穿、穿透</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">redis快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%BA%93%E5%8C%BA%E5%88%AB"><span class="toc-text">几个常用库区别</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="toc-text">数据结构有哪些</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SDS"><span class="toc-text">SDS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8%EF%BC%88linkedlist%EF%BC%89"><span class="toc-text">双向链表（linkedlist）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9%E9%93%BE%E8%A1%A8%EF%BC%88ziplist%EF%BC%89"><span class="toc-text">压缩链表（ziplist）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E8%A1%A8"><span class="toc-text">哈希表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%B3%E8%A1%A8"><span class="toc-text">跳表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#quickList%EF%BC%88%E6%9A%82%E6%97%B6%E4%B8%8D%E8%80%83%EF%BC%89"><span class="toc-text">quickList（暂时不考）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E5%AF%B9%E5%BA%94%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text">命令对应的复杂度</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-redis%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">mysql redis数据一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%EF%BC%9A"><span class="toc-text">核心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88"><span class="toc-text">方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95"><span class="toc-text">强一致性算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%97%AE%E9%A2%98"><span class="toc-text">拜占庭问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB-raft-Paxos%E8%A7%86%E9%A2%91"><span class="toc-text">ZAB raft Paxos视频</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#RDB-amp-AOF%E5%8C%BA%E5%88%AB"><span class="toc-text">RDB &amp; AOF区别</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RDB"><span class="toc-text">RDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF"><span class="toc-text">优势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A3%E5%8A%BF"><span class="toc-text">劣势</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AOF"><span class="toc-text">AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF-1"><span class="toc-text">优势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A3%E5%8A%BF-1"><span class="toc-text">劣势</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-text">混合持久化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-text">执行过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8A%A3%E5%8A%BF%EF%BC%8C%E5%B0%B1%E6%98%AF%E5%8F%8C%E6%96%B9%E7%9A%84%E6%95%B4%E5%90%88"><span class="toc-text">优劣势，就是双方的整合</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9%E3%80%81%E5%87%BB%E7%A9%BF%E3%80%81%E7%A9%BF%E9%80%8F"><span class="toc-text">缓存雪崩、击穿、穿透</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E5%8D%95%E7%BA%BF%E7%A8%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">redis单线程多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E5%85%A5%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">引入多线程的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BA%94%E7%94%A8"><span class="toc-text">多线程应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E6%8A%80%E6%9C%AF"><span class="toc-text">IO多路复用技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#BIO"><span class="toc-text">BIO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NIO"><span class="toc-text">NIO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#select"><span class="toc-text">select</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#poll"><span class="toc-text">poll</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll"><span class="toc-text">epoll</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%A2%E8%B1%A1%E5%9B%BE%E8%A7%A3"><span class="toc-text">形象图解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-text">比较</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">redis快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9C%8B%E9%97%A8%E7%8B%97%E6%9C%BA%E5%88%B6"><span class="toc-text">看门狗机制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="toc-text">redis内存淘汰策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%87%E6%9C%9F%E7%9A%84key%E6%80%8E%E4%B9%88%E5%88%A0%E9%99%A4"><span class="toc-text">过期的key怎么删除</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95%E6%89%A9%E7%BC%A9%E5%AE%B9"><span class="toc-text">一致性hash算法扩缩容</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F"><span class="toc-text">哨兵模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%BA%93%E5%8C%BA%E5%88%AB"><span class="toc-text">几个常用库区别</span></a></li></ol>
       
     </div>
   </div>

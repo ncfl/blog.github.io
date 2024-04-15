@@ -8,10 +8,13 @@
   <meta name="author" content="ncfl" />
   <meta name="description" content="" />
   
-    <meta name="robots" content="noindex" />
-  
   
   <title>
+    
+      NOW直播-关注关系维护 
+      
+      
+      |
     
      ncfl
   </title>
@@ -98,281 +101,236 @@
 
 
       <div class="flex-container">
-        <div class="container index">
-  <div class="post-list">
-    <!-- 遍历渲染文章 -->
-    
-      <div class="post-item" title="git相关操作">
-        <div class="time-m-d">2018-09-29</div>
-        <div class="title">
-          <a href="/post/24802/">
-            
-              
-                <span>git相关操作</span>
-              
-            
-          </a>
-        </div>
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">NOW直播-关注关系维护</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2024-04-14 16:24:16
+        </span>
+        
       </div>
-    
-      <div class="post-item" title="leanote安装-原生安装">
-        <div class="time-m-d">2018-09-27</div>
-        <div class="title">
-          <a href="/post/41906/">
-            
-              
-                <span>leanote安装-原生安装</span>
-              
-            
-          </a>
-        </div>
+      <div class="markdown-body">
+        <h1 id="方案选型"><a href="#方案选型" class="headerlink" title="方案选型"></a>方案选型</h1><p>A关注B,这个关系对写mysql还是写redis？核心问题就是持久化问题</p>
+<ul>
+<li><p>如果写redis：</p>
+<ul>
+<li>优点：<ol>
+<li>响应速度快</li>
+<li>代码设计简单，不用做冷热数据的维护，set维护即可</li>
+</ol>
+</li>
+<li>缺点：<ol>
+<li>持久化问题，redis是通过广播的方式来做主从的数据备份，一旦master挂了，必然导致数据丢失</li>
+<li>成本问题，纯内存的成本必然高</li>
+<li>冷热数据都存在redis中，但是冷数据其实存在磁盘中即可</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>如果写mysql：</p>
+<ul>
+<li>优点：<ol>
+<li>数据持久化，即使节点挂了，数据也是安全的</li>
+<li>成本相对偏低</li>
+</ol>
+</li>
+<li>缺点：<ol>
+<li>响应速度相对不足，磁盘相较于内存还是有很大差距的</li>
+<li>必然需要需要redis做冷热数据的维护，代码复杂度上去</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>当今mysql &amp; redis的关系</p>
+<ul>
+<li>顺丰：数据安全最重要：– 假设用户有反馈，丢了一个单搞不好就真的没了<ol>
+<li>mysql作为核心数据存储，redis作为缓存，所有数据以mysql数据为准</li>
+<li>可以做到数据的自己的修复，直接把redis干掉就完事了，当然要注意缓存雪崩 缓存击穿 缓存穿透</li>
+<li>需要维护redis和mysql的数据一致性，相对而言，系统会比较复杂（写数据的时候，双删的策略，先删除redis，再更新mysql，再删除redis）</li>
+</ol>
+</li>
+<li>腾讯：用户体验最重要：– 假设用户有反馈，直接给用户手动补齐虚拟物品即可<ol>
+<li>redis缓存核心数据，mysql作为数据的操作日志，redis异常的时候用以修复数据</li>
+<li>用户数据异常的时候，需要手动根据mysql的日志进行修复</li>
+<li>系统设计相对于简单，直接写两个存储即可，毕竟出问题的概率不大，mysql的存储日志使用场景不大，更适合微服务</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="不同场景的关注维护"><a href="#不同场景的关注维护" class="headerlink" title="不同场景的关注维护"></a>不同场景的关注维护</h1><p>ps: 以下业务上都是允许一两条数据的丢失，但是不允许大部分数据的丢失，因为少量数据的丢失，用户可以用重试的机制自动修复，或者人工保障之后运营维护</p>
+<h2 id="新项目"><a href="#新项目" class="headerlink" title="新项目"></a>新项目</h2><ul>
+<li>背景：关注关系比较简单，类似微信这种的，为好友关系，关系为双向的。A添加B为好友，B也是A的好友。</li>
+<li>设计：目前设计是用redis的set存储，同一个用户仅有一个key。A同意添加B为好友之后，写分别在A和B的key添加上对方即可。</li>
+<li>性能影响：好友关系，正常来说，一个用户对应的好友不会有太多，所以不用考虑大key的出现，O(logN)也不会降低性能（假设真的有用户添加很多的好友，业务加上限限制即可）</li>
+<li>不足：数据安全性，保存在redis中，如果真的故障了，只能通过rdb或者主从恢复，可能导致数据丢失</li>
+</ul>
+<h2 id="QQ直播"><a href="#QQ直播" class="headerlink" title="QQ直播"></a>QQ直播</h2><ul>
+<li>背景：关注关系较复杂，有两个关系：关注列表，粉丝列表。两个列表是单向的，且量级上可能存在巨大差异</li>
+<li>设计：在redis分别维护同一个用户的关注列表、粉丝列表。A关注B之后，在A的关注列表加上B，在B的粉丝列表上加上A</li>
+<li>性能影响：正常来说用户的关注列表一般比较小，但是粉丝列表可能巨大，大key和O(logN)性能问题不可避免</li>
+<li>不足：①无法避免突发事件，如果某个用户的粉丝列表突然增大了，响应速率会快速降低，作为底层组件，直接影响该上游； ②如果可以预料会有大主播，可以提前申请，分配key的时候，可以根据账号ID来做分key操作；或者业务可以接受T+1的影响，会在每天凌晨对当天达到阈值的key进行自动分key操作； ③数据安全性，保存在redis中，如果真的故障了，只能通过rdb或者主从恢复，可能导致数据丢失</li>
+</ul>
+<h2 id="NOW直播"><a href="#NOW直播" class="headerlink" title="NOW直播"></a>NOW直播</h2><ul>
+<li>背景：之前的关注底层存储不再维护，需要重新设计一套新存储</li>
+<li>方案选项<ul>
+<li>关注列表： 选择redis还是mysql<ul>
+<li>关注的访问QPS是巨高的（2000&#x2F;s），查询是否关注，拉去关注列表等操作。</li>
+<li>①如果选择mysql，性能肯定跟不上（舍弃） </li>
+<li>②如果选择redis又担心数据丢失，这是敏感且关键的数据（舍弃）；</li>
+<li>③经过多方的了解，腾讯内部有个组件KeewiDB，支持数据的冷热备份，即实现了类似mysql-redis的数据存储，降低了业务复杂度；同时支持redis的协议和备份，万一这个组件后续真的异常了，便于把数据直接迁移到redis；采用的组件是Inter提供的一个持久化组件，内存-持久化内存-SSD，但是具体的实现细节没有提供；经过官方文档提供的压测报告和业务自己的压测结论，可以作为选型；比纯redis便宜，数据更安全</li>
+</ul>
+</li>
+<li>粉丝列表<ul>
+<li>QPS访问量不大；核心解决大Key问题；主要来源为用户手动操作，但是几百万的大主播不会去一页一页翻粉丝列表；业务后台不会自动访问，比如给主播所有的粉丝推送消息等，但是这种情况允许delay</li>
+<li>①如果选择redis，必须要解决大key的问题，主动分key等操作（舍弃）</li>
+<li>②选用MongoDB，可以自己完成分key的操作，也是之前的团队推荐的方案，相较于mysql这种关系型数据库，MongoDB这种更适合做关注的存储，相关比较见<a href="https://blog.ncfl.tech/post/243/#mysql-VS-mongoDB">https://blog.ncfl.tech/post/243/#mysql-VS-mongoDB</a></li>
+</ul>
+</li>
+<li>数据一致性保障：<ul>
+<li>写数据通过加锁来保障不会冲突，key: A_B</li>
+<li>写双份存储，优先写redis，redis失败，直接错误；redis成功之后，写MongoDB，如果MongoDB失败了，直接异步kafka，按照最新的时间戳做重试，进而保证数据写接口耗时不会太高</li>
+<li>读数据，拉取关注列表，直接从内存拉取，未做优化。拉取粉丝列表，暂未新增一层缓存，暂时没必要</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="微信"><a href="#微信" class="headerlink" title="微信"></a>微信</h2><ul>
+<li>微信架构：内存-&gt;SSD-&gt;STAT，采用三级缓存，但是数据一致性的维护成本较高。可以抗住6亿存储量。</li>
+<li>采用地域hash算法对数据进行区域性缓存，即上海的用户的缓存只会存在上海的缓存中，避免无用的冷数据，且分摊不同区域的压力。</li>
+<li>没有微信的量，也没有微信的成本预算，没有必要设计得那么复杂。</li>
+</ul>
+<h1 id="关注迁移"><a href="#关注迁移" class="headerlink" title="关注迁移"></a>关注迁移</h1><p>copy on write COW</p>
+<ol>
+<li>新服务作为老服务proxy，将服务请求转发至老服务，并将对应的写请求暂存</li>
+<li>冷备数据为T-1的，将某天的冷备数据迁移至新存储介质中</li>
+<li>将步骤1中的数据按照时间进行重写到新存储</li>
+<li>写数据双写，读数据校验新老介质数据是否一样，如果不一样，则用老数据进行修复</li>
+<li>存储迁移完毕，数据切换</li>
+</ol>
+
       </div>
-    
-      <div class="post-item" title="JAVA基础（4）jvm 内存空间+对象+GC">
-        <div class="time-m-d">2017-11-06</div>
-        <div class="title">
-          <a href="/post/40532/">
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
             
-              
-                <span>JAVA基础（4）jvm 内存空间+对象+GC</span>
-              
+              <a href="/post/243/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
             
-          </a>
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2024-04-14 16:24:16
+            </span>
+            
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
         </div>
-      </div>
+      
+    </div>
     
-      <div class="post-item" title="JAVA基础（3）jvm class文件解读">
-        <div class="time-m-d">2017-11-04</div>
-        <div class="title">
-          <a href="/post/38210/">
-            
-              
-                <span>JAVA基础（3）jvm class文件解读</span>
-              
-            
-          </a>
-        </div>
-      </div>
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-text">方案选型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E7%9A%84%E5%85%B3%E6%B3%A8%E7%BB%B4%E6%8A%A4"><span class="toc-text">不同场景的关注维护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E9%A1%B9%E7%9B%AE"><span class="toc-text">新项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QQ%E7%9B%B4%E6%92%AD"><span class="toc-text">QQ直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOW%E7%9B%B4%E6%92%AD"><span class="toc-text">NOW直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E4%BF%A1"><span class="toc-text">微信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E8%BF%81%E7%A7%BB"><span class="toc-text">关注迁移</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
     
-      <div class="post-item" title="JAVA基础（2）jvm类加载">
-        <div class="time-m-d">2017-11-02</div>
-        <div class="title">
-          <a href="/post/17469/">
-            
-              
-                <span>JAVA基础（2）jvm类加载</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="JAVA基础（1）IO流操作">
-        <div class="time-m-d">2017-10-12</div>
-        <div class="title">
-          <a href="/post/55206/">
-            
-              
-                <span>JAVA基础（1）IO流操作</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（6）SpringSecurity">
-        <div class="time-m-d">2017-08-15</div>
-        <div class="title">
-          <a href="/post/16087/">
-            
-              
-                <span>SpringBoot（6）SpringSecurity</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（5）操作数据库Spring-Data-JPA">
-        <div class="time-m-d">2017-08-06</div>
-        <div class="title">
-          <a href="/post/41775/">
-            
-              
-                <span>SpringBoot（5）操作数据库Spring-Data-JPA</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（4）WebSocket">
-        <div class="time-m-d">2017-08-06</div>
-        <div class="title">
-          <a href="/post/16838/">
-            
-              
-                <span>SpringBoot（4）WebSocket</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（3）从yml文件中获取数据和Thymeleaf 模板引擎">
-        <div class="time-m-d">2017-08-03</div>
-        <div class="title">
-          <a href="/post/46333/">
-            
-              
-                <span>SpringBoot（3）从yml文件中获取数据和Thymeleaf 模板引擎</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（2）一些很实用的功能">
-        <div class="time-m-d">2017-08-02</div>
-        <div class="title">
-          <a href="/post/25742/">
-            
-              
-                <span>SpringBoot（2）一些很实用的功能</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（1）入门">
-        <div class="time-m-d">2017-08-01</div>
-        <div class="title">
-          <a href="/post/65052/">
-            
-              
-                <span>SpringBoot（1）入门</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（9）Java API实现搜索，排序，高亮，分页">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/59727/">
-            
-              
-                <span>ES（9）Java API实现搜索，排序，高亮，分页</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（8）Java API实现增删改查">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/59312/">
-            
-              
-                <span>ES（8）Java API实现增删改查</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（7）请求的发送">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/30881/">
-            
-              
-                <span>ES（7）请求的发送</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（6）分页，排序，指定字段和kibana的安装">
-        <div class="time-m-d">2017-07-25</div>
-        <div class="title">
-          <a href="/post/30206/">
-            
-              
-                <span>ES（6）分页，排序，指定字段和kibana的安装</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（5）在logstash中配置分词器和同义词过滤器">
-        <div class="time-m-d">2017-07-25</div>
-        <div class="title">
-          <a href="/post/39047/">
-            
-              
-                <span>ES（5）在logstash中配置分词器和同义词过滤器</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（4）Head的安装">
-        <div class="time-m-d">2017-07-24</div>
-        <div class="title">
-          <a href="/post/50519/">
-            
-              
-                <span>ES（4）Head的安装</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（3）logstash安装和logstash-input-jdbc插件">
-        <div class="time-m-d">2017-07-24</div>
-        <div class="title">
-          <a href="/post/16057/">
-            
-              
-                <span>ES（3）logstash安装和logstash-input-jdbc插件</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（2）IK分词器和拼音分词器的安装">
-        <div class="time-m-d">2017-07-23</div>
-        <div class="title">
-          <a href="/post/25857/">
-            
-              
-                <span>ES（2）IK分词器和拼音分词器的安装</span>
-              
-            
-          </a>
-        </div>
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
       </div>
     
   </div>
-  <nav class="post-navigation">
-    
-      <a href="/page/2/"><i class="iconfont icon-angleleft"></i></a>
-    
-    <span class="page-num">3 / 4</span>
-    
-      <a href="/page/4/"><i class="iconfont icon-angleright"></i></a>
-    
-  </nav>
-</div>
+
 
         
 <div class="footer">

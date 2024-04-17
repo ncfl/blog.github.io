@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-04-14 16:46:47
+          2024-04-17 13:11:13
         </span>
         
               <span class="post-tags">
@@ -180,6 +180,7 @@
 
 <h1 id="kafka的分区策略"><a href="#kafka的分区策略" class="headerlink" title="kafka的分区策略"></a>kafka的分区策略</h1><p>核心参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cnblogs.com/hzmark/p/sticky_assignor.html">https://www.cnblogs.com/hzmark/p/sticky_assignor.html</a></p>
 <p>同一个kafka的同一个Partition最多只能由一个consumer消费，保证有序和offset的维护</p>
+<p>消费者分区策略也叫kafka的负载均衡</p>
 <h2 id="RangeAssignor，默认策略"><a href="#RangeAssignor，默认策略" class="headerlink" title="RangeAssignor，默认策略"></a>RangeAssignor，默认策略</h2><p>同一个kafka，根据Partition排序后逐一分配给consumer</p>
 <p>不足：下图第二种情况，C0需要消费P0、P1两个分片，如果多个kafka都是这样的话，C0的压力会很大</p>
 <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202404141630906.png" width=700px/>
@@ -195,8 +196,144 @@
 </ol>
 <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202404141641890.png" width=700px/>
 
+<h1 id="kafka数据一致性-amp-主从切换"><a href="#kafka数据一致性-amp-主从切换" class="headerlink" title="kafka数据一致性 &amp; 主从切换"></a>kafka数据一致性 &amp; 主从切换</h1><p>主要参考：</p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/weixin_38750084/article/details/82942564">https://blog.csdn.net/weixin_38750084/article/details/82942564</a></p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/BASk2311/article/details/130942641">https://blog.csdn.net/BASk2311/article/details/130942641</a></p>
+<p>topic partition broker分布关系图<br><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202404161613348.png" width=600px/></p>
+<h2 id="同步复制"><a href="#同步复制" class="headerlink" title="同步复制"></a>同步复制</h2><ol>
+<li>producer联系zk识别leader</li>
+<li>向leader发送消息</li>
+<li>leadr收到消息写入到本地log</li>
+<li>follower从leader pull消息</li>
+<li>follower向本地写入log</li>
+<li>follower向leader发送ack消息</li>
+<li>leader收到所有follower的ack消息</li>
+<li>leader向producer回传ack</li>
+</ol>
+<h2 id="异步复制"><a href="#异步复制" class="headerlink" title="异步复制"></a>异步复制</h2><p>leader写入本地log之后，直接向client回传ack消息，不需要等待所有follower复制完成</p>
+<h2 id="主从切换"><a href="#主从切换" class="headerlink" title="主从切换"></a>主从切换</h2><ul>
+<li>ISR：表示和 Leader 保持同步的 Follower 集合。如果 Follower 长时间未向 Leader 发送通信请求或同步数据，则该 Follower 将被踢出 ISR。该时间阈值由 <code>replica.lag.time.max.ms</code>参数设定，默认 30s。Leader 发生故障之后，就会从 ISR 中选举新的Leader。如果ISR小于配置的<code>min.insync.replocas</code>则会认为kafka不可用</li>
+<li>OSR：表示 Follower 与 Leader 副本同步时，延迟过多的副本。</li>
+<li>AR: 指的是分区中的所有副本，所以AR &#x3D; ISR + OSR。</li>
+<li>这些信息都是维护在zk里面的，每次选举也是由zk发起和执行的</li>
+</ul>
+<h3 id="follower故障"><a href="#follower故障" class="headerlink" title="follower故障"></a>follower故障</h3><ul>
+<li>LEO（Log End Offset）：每个副本的最后一个offset，LEO就是最新的offset + 1。</li>
+<li>HW（High Watermark）：水位线，所有副本中最小的LEO ，消费者只能看到这个水位线左边的消息，从而保证数据的一致性。</li>
+</ul>
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202404161621458.png" width=600px/>
 
-<h1 id="生产轮询、消费轮询"><a href="#生产轮询、消费轮询" class="headerlink" title="生产轮询、消费轮询"></a>生产轮询、消费轮询</h1><h1 id="kafka删除策略"><a href="#kafka删除策略" class="headerlink" title="kafka删除策略"></a>kafka删除策略</h1>
+<ul>
+<li>Follower发生故障后会被临时踢出ISR队列。</li>
+<li>这个期间Leader和其他Follower继续接收数据。</li>
+<li>待该Follower恢复后，Follower会读取本地磁盘记录的上次的HW，并将log文件高于HW的部分截取掉，从HW开始向Leader进行同步。</li>
+<li>等该Follower的LEO大于等于该Partition的HW，即Follower追上Leader之后，就可以重新加入ISR了。</li>
+</ul>
+<h3 id="leader故障"><a href="#leader故障" class="headerlink" title="leader故障"></a>leader故障</h3><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202404161621458.png" width=600px/>
+
+<ul>
+<li>Leader发生故障之后，会从ISR中选出一个新的Leader</li>
+<li>为保证多个副本之间的数据一致性，其余的Follower会先将各自的log文件高于HW的部分截掉，然后从新的Leader同步数据。</li>
+</ul>
+<h1 id="生产、消费commit方式"><a href="#生产、消费commit方式" class="headerlink" title="生产、消费commit方式"></a>生产、消费commit方式</h1><h2 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h2><p>核心参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/u013433591/article/details/128486967">https://blog.csdn.net/u013433591/article/details/128486967</a></p>
+<ul>
+<li>acks&#x3D;0<ul>
+<li>生产者只管发送消息，不等待broker返回响应</li>
+<li>安全级别最低，无法感知broker是否存活</li>
+<li>吞吐量高，网络开销小</li>
+</ul>
+</li>
+<li>acks&#x3D;1<ul>
+<li>生产者发送数据后，等待Leader分区返回结果确认</li>
+<li>如果leader和follower数据未完全同步，leader挂了，则会导致数据丢失</li>
+</ul>
+</li>
+<li>acks&#x3D;all(或者acks&#x3D;-1)<ul>
+<li>生产者发送数据后，等待ISR内所有的follower确认后，Leader分区返回结果确认</li>
+<li>如果ISR小于配置的<code>min.insync.replicas</code>则会认为kafka不可用</li>
+<li>数据安全性最高，性能影响最大</li>
+<li>数据可能会重复，leader挂了，一个follower同步了数据，且被选为新的leader；上个请求失败，客户端重试，造成数据重复</li>
+</ul>
+</li>
+</ul>
+<h2 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h2><p>核心参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://jepson-song.github.io/2022/04/06/kafka%E4%B9%8Bconsumer%E7%9A%84commit%E6%9C%BA%E5%88%B6/">https://jepson-song.github.io/2022/04/06/kafka%E4%B9%8Bconsumer%E7%9A%84commit%E6%9C%BA%E5%88%B6/</a></p>
+<ul>
+<li>自动提交<ul>
+<li>每个一段时间，consumer 基于<code>auto_commit_interval_ms</code>配置提交一次commit</li>
+<li>假设未提交成功，发生了rebalance，则会从新的leader上消费数据，但是offset未同步过去，故会造成数据的重复消费</li>
+<li>consumer每次拉取数据都是批量拉取的，假设拉取过程中，部分数据处理处理失败了，但是自动提交只会commit最大的offset，导致失败的数据无法自己重试，造成数据丢失</li>
+</ul>
+</li>
+<li>手动提交<ul>
+<li>同步提交，每消费一个数据提交一次commit，且等待kafka返回提交是否成功，对性能影响较大</li>
+<li>异步提交，每消费一个数据提交一次commit，默认kafka成功收到，如果是偶现的，影响不大，下次offset更大，偏移量还是会往前走，如果kafka挂了，则异步提交一直失败，后续rebalance之后会造成数据重复丢失</li>
+</ul>
+</li>
+</ul>
+<h1 id="kafka顺序读写"><a href="#kafka顺序读写" class="headerlink" title="kafka顺序读写"></a>kafka顺序读写</h1><p>主要参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.cnblogs.com/sunsky303/p/9511839.html">https://www.cnblogs.com/sunsky303/p/9511839.html</a></p>
+<h2 id="全局顺序："><a href="#全局顺序：" class="headerlink" title="全局顺序："></a>全局顺序：</h2><p>难度极大：</p>
+<ul>
+<li>发送端：不能异步发送，异步发送可能异步达到，进而导致无序，通过<code>max.in.flight.requests.per.connection</code>指定，为1表示同时请求数最大只能为1</li>
+<li>存储端：每个topic只能由一个partition，且不能有主从，主从无法保证顺序性等，牺牲kafka的高可用和高性能 </li>
+<li>消费端：不能多线程消费，且必须同步提交offset</li>
+</ul>
+<h2 id="局部有序"><a href="#局部有序" class="headerlink" title="局部有序"></a>局部有序</h2><ul>
+<li>假设只是针对某一个订单号或者uid需要有序，则可以将同一个uid、订单号指定发往同一个topic的partition，一个partition最多只能有一个consumer，这样就可以保证有序性</li>
+<li>发送端同样不能异步发送，需要同步发送，消费端也不能多线程消费，且需要同步提交offset</li>
+</ul>
+<h1 id="kafka分区变更"><a href="#kafka分区变更" class="headerlink" title="kafka分区变更"></a>kafka分区变更</h1><p>kafka分区只能增加不能减少：</p>
+<ul>
+<li>减少：partition减少的维护成本太高了，需要将减少的分区数据进行迁移，数据量大，且无法保证输出有序性，迁移过来的数据无法保证追加在后面还是在前面</li>
+<li>增加：增加partition，会导致consumer触发rebalance，进而可能导致分区数据重复消费，消费者需要自身保证数据一致性</li>
+</ul>
+<h1 id="kafka生产发布轮询"><a href="#kafka生产发布轮询" class="headerlink" title="kafka生产发布轮询"></a>kafka生产发布轮询</h1><p>也叫kafka的负载均衡</p>
+<h2 id="producer："><a href="#producer：" class="headerlink" title="producer："></a>producer：</h2><ul>
+<li>如果指定了key，则会根据key的hash值，将数据写入某个指定的partition <code>Utils.abs(key.hashCode) % numPartitions</code></li>
+<li>如果未指定key，则会按照轮询的方式，将数据按照partition轮询写入</li>
+<li>也可以在produce的时候，自己实现分区方式，如随机partition写入，指定几个partition写入等</li>
+</ul>
+<h2 id="consumer："><a href="#consumer：" class="headerlink" title="consumer："></a>consumer：</h2><p>基于consumer分区策略，一个partition只能由一个consumer消费，可见上文，也叫做consumer之间的负载均衡</p>
+<h1 id="kafka删除策略"><a href="#kafka删除策略" class="headerlink" title="kafka删除策略"></a>kafka删除策略</h1><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/u011066470/article/details/125371654">https://blog.csdn.net/u011066470/article/details/125371654</a></p>
+<table>
+<thead>
+<tr>
+<th><strong>属性名</strong></th>
+<th><strong>含义</strong></th>
+<th><strong>默认值</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>log.cleanup.polict</td>
+<td>日志清理保存的策略只有delete和compact两种</td>
+<td>delete</td>
+</tr>
+<tr>
+<td>log.retention.hours</td>
+<td>日志保存的时间，可以选择hours,minutes和ms</td>
+<td>168(7day)</td>
+</tr>
+<tr>
+<td>log.retention.bytes</td>
+<td>删除前日志文件允许保存的最大值</td>
+<td>-1</td>
+</tr>
+<tr>
+<td>log.segment.delete.delay.ms</td>
+<td>日志文件被真正删除前的保留时间</td>
+<td>60000</td>
+</tr>
+<tr>
+<td>log.cleanup.interval.mins</td>
+<td>每隔一段时间多久调用一次清理的步骤（满足删除）</td>
+<td>10</td>
+</tr>
+<tr>
+<td>log.retention.check.interval.ms</td>
+<td>周期性检查是否有日志符合删除的条件（新版本使用）</td>
+<td>300000</td>
+</tr>
+</tbody></table>
+<h1 id="kafka事务"><a href="#kafka事务" class="headerlink" title="kafka事务"></a>kafka事务</h1>
       </div>
       
         <div class="prev-or-next">
@@ -211,7 +348,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-04-14 16:46:47
+              2024-04-17 13:11:13
             </span>
             
                   <span class="post-tags">
@@ -245,7 +382,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%BD%AE%E8%AF%A2%E3%80%81%E6%B6%88%E8%B4%B9%E8%BD%AE%E8%AF%A2"><span class="toc-text">生产轮询、消费轮询</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-amp-%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">kafka数据一致性 &amp; 主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">同步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">异步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#follower%E6%95%85%E9%9A%9C"><span class="toc-text">follower故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader%E6%95%85%E9%9A%9C"><span class="toc-text">leader故障</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E3%80%81%E6%B6%88%E8%B4%B9commit%E6%96%B9%E5%BC%8F"><span class="toc-text">生产、消费commit方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E9%A1%BA%E5%BA%8F%E8%AF%BB%E5%86%99"><span class="toc-text">kafka顺序读写</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E9%A1%BA%E5%BA%8F%EF%BC%9A"><span class="toc-text">全局顺序：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E6%9C%89%E5%BA%8F"><span class="toc-text">局部有序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%86%E5%8C%BA%E5%8F%98%E6%9B%B4"><span class="toc-text">kafka分区变更</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%94%9F%E4%BA%A7%E5%8F%91%E5%B8%83%E8%BD%AE%E8%AF%A2"><span class="toc-text">kafka生产发布轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer%EF%BC%9A"><span class="toc-text">producer：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer%EF%BC%9A"><span class="toc-text">consumer：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E4%BA%8B%E5%8A%A1"><span class="toc-text">kafka事务</span></a></li></ol>
       
     </div>
   </div>

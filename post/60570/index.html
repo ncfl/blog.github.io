@@ -8,10 +8,13 @@
   <meta name="author" content="ncfl" />
   <meta name="description" content="" />
   
-    <meta name="robots" content="noindex" />
-  
   
   <title>
+    
+      顺丰-全链路压测 
+      
+      
+      |
     
      ncfl
   </title>
@@ -98,281 +101,176 @@
 
 
       <div class="flex-container">
-        <div class="container index">
-  <div class="post-list">
-    <!-- 遍历渲染文章 -->
-    
-      <div class="post-item" title="jdk8函数式编程">
-        <div class="time-m-d">2018-10-12</div>
-        <div class="title">
-          <a href="/post/63007/">
-            
-              
-                <span>jdk8函数式编程</span>
-              
-            
-          </a>
-        </div>
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">顺丰-全链路压测</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2024-04-19 20:24:34
+        </span>
+        
       </div>
-    
-      <div class="post-item" title="mysql经验总结">
-        <div class="time-m-d">2018-09-29</div>
-        <div class="title">
-          <a href="/post/2930/">
-            
-              
-                <span>mysql经验总结</span>
-              
-            
-          </a>
-        </div>
+      <div class="markdown-body">
+        <h1 id="压测"><a href="#压测" class="headerlink" title="压测"></a>压测</h1><ul>
+<li>顺丰双十一的流量会暴涨，需要预计系统是否能扛住，经过一年的迭代不知道系统是否是否还有瓶颈</li>
+<li>前一年在测试环境搭建了一个系统重新部署压测，测试环境不够真实，且能力有限，很多场景没有压测到</li>
+<li>拉上其他核心系统一起在正式环境压测，并且保证每个接口同时达到峰值（单接口压测并不能反应系统的压力）</li>
+<li>当年的流量压力更大，预计为日常的3倍</li>
+<li>顺丰的服务不算真正意义的微服务，分模块了，但是每个服务都比较大，一共就5个服务（设计非常巧妙）（pickup\delivery\sync\topic\match）</li>
+</ul>
+<h1 id="负责"><a href="#负责" class="headerlink" title="负责"></a>负责</h1><ul>
+<li>压测前期：<ul>
+<li>数据采集：采集每个接口的数据请求量</li>
+</ul>
+</li>
+<li>数据隔离：<ul>
+<li>基于AOP，保障压测数据不会流入正式环境的存储。</li>
+<li>错峰压测，保证对线上影响最小。</li>
+<li>对于非压测系统，需要mock，模拟sleep(),防止影响下游，包括数据和流量</li>
+</ul>
+</li>
+<li>能力构建：<ul>
+<li>自建压测平台进行全链路压测（别人写的，我是协助者，但是代码看得七七八八的）</li>
+<li>Groovy嵌套脚本，压测服务启动时预热groovy脚本，后续随时使用</li>
+<li>go、shell、jvm 分析脚本瓶颈</li>
+</ul>
+</li>
+<li>压测结果：<ul>
+<li>kafka 磁盘升级：压测工具写kafka写不进去，经常timeout，kafka所在机器告警，升级&amp;更换更好的物理机</li>
+<li>kafka 分区数量扩容：消费kafka对应的服务，通过监控看有几台没有波动，通过分析是因为kafka分区数小于节点数。虽然kafka增加分区了不能减少分区，但是评估下来影响不大。迁移在半夜迁移，影响几乎为零（服务已经做好了幂等策略，保证同一个数据不会被重复消费）</li>
+<li>服务日志级别变更：之前的日志级别是INFO，通过java的堆栈分析（heap dump和thread dump），发现很多现成卡在了日志级别上</li>
+<li>服务CPU内存升级：之前的服务器和kakfa是在一个机房的，长时间没有维护，运维也怕背锅，把对应的服务升级了。好像是8核16G升级成了16核32G（还是12核？）为了双十一，这点成本值了，时间短</li>
+</ul>
+</li>
+<li>压测后续：构建系统健康监控系统，保障系统可观测性可用，异常情况及时预警<ul>
+<li>对整个系统的数据情况、来源比较了解。</li>
+<li>和数据同学沟通，将每个接口对应的数据上报捞出来（一两百行的SQL）绘制成图</li>
+<li>针对不同接口设置不同的预警值，分别有短信电话告警值。前期把领导们吵的不行，一点点优化</li>
+<li>在腾讯这是个相关成熟的功能，但是在顺丰这些能力需要自己搭建</li>
+</ul>
+</li>
+</ul>
+
       </div>
-    
-      <div class="post-item" title="git相关操作">
-        <div class="time-m-d">2018-09-29</div>
-        <div class="title">
-          <a href="/post/24802/">
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
             
-              
-                <span>git相关操作</span>
-              
+              <a href="/post/62811/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
             
-          </a>
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2024-04-19 20:24:34
+            </span>
+            
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
         </div>
-      </div>
+      
+    </div>
     
-      <div class="post-item" title="leanote安装-原生安装">
-        <div class="time-m-d">2018-09-27</div>
-        <div class="title">
-          <a href="/post/41906/">
-            
-              
-                <span>leanote安装-原生安装</span>
-              
-            
-          </a>
-        </div>
-      </div>
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%8B%E6%B5%8B"><span class="toc-text">压测</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%B4%9F%E8%B4%A3"><span class="toc-text">负责</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
     
-      <div class="post-item" title="JAVA基础（4）jvm 内存空间+对象+GC">
-        <div class="time-m-d">2017-11-06</div>
-        <div class="title">
-          <a href="/post/40532/">
-            
-              
-                <span>JAVA基础（4）jvm 内存空间+对象+GC</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="JAVA基础（3）jvm class文件解读">
-        <div class="time-m-d">2017-11-04</div>
-        <div class="title">
-          <a href="/post/38210/">
-            
-              
-                <span>JAVA基础（3）jvm class文件解读</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="JAVA基础（2）jvm类加载">
-        <div class="time-m-d">2017-11-02</div>
-        <div class="title">
-          <a href="/post/17469/">
-            
-              
-                <span>JAVA基础（2）jvm类加载</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="JAVA基础（1）IO流操作">
-        <div class="time-m-d">2017-10-12</div>
-        <div class="title">
-          <a href="/post/55206/">
-            
-              
-                <span>JAVA基础（1）IO流操作</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（6）SpringSecurity">
-        <div class="time-m-d">2017-08-15</div>
-        <div class="title">
-          <a href="/post/16087/">
-            
-              
-                <span>SpringBoot（6）SpringSecurity</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（5）操作数据库Spring-Data-JPA">
-        <div class="time-m-d">2017-08-06</div>
-        <div class="title">
-          <a href="/post/41775/">
-            
-              
-                <span>SpringBoot（5）操作数据库Spring-Data-JPA</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（4）WebSocket">
-        <div class="time-m-d">2017-08-06</div>
-        <div class="title">
-          <a href="/post/16838/">
-            
-              
-                <span>SpringBoot（4）WebSocket</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（3）从yml文件中获取数据和Thymeleaf 模板引擎">
-        <div class="time-m-d">2017-08-03</div>
-        <div class="title">
-          <a href="/post/46333/">
-            
-              
-                <span>SpringBoot（3）从yml文件中获取数据和Thymeleaf 模板引擎</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（2）一些很实用的功能">
-        <div class="time-m-d">2017-08-02</div>
-        <div class="title">
-          <a href="/post/25742/">
-            
-              
-                <span>SpringBoot（2）一些很实用的功能</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="SpringBoot（1）入门">
-        <div class="time-m-d">2017-08-01</div>
-        <div class="title">
-          <a href="/post/65052/">
-            
-              
-                <span>SpringBoot（1）入门</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（9）Java API实现搜索，排序，高亮，分页">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/59727/">
-            
-              
-                <span>ES（9）Java API实现搜索，排序，高亮，分页</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（8）Java API实现增删改查">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/59312/">
-            
-              
-                <span>ES（8）Java API实现增删改查</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（7）请求的发送">
-        <div class="time-m-d">2017-07-31</div>
-        <div class="title">
-          <a href="/post/30881/">
-            
-              
-                <span>ES（7）请求的发送</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（6）分页，排序，指定字段和kibana的安装">
-        <div class="time-m-d">2017-07-25</div>
-        <div class="title">
-          <a href="/post/30206/">
-            
-              
-                <span>ES（6）分页，排序，指定字段和kibana的安装</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（5）在logstash中配置分词器和同义词过滤器">
-        <div class="time-m-d">2017-07-25</div>
-        <div class="title">
-          <a href="/post/39047/">
-            
-              
-                <span>ES（5）在logstash中配置分词器和同义词过滤器</span>
-              
-            
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="ES（4）Head的安装">
-        <div class="time-m-d">2017-07-24</div>
-        <div class="title">
-          <a href="/post/50519/">
-            
-              
-                <span>ES（4）Head的安装</span>
-              
-            
-          </a>
-        </div>
+      <div class="comments-container">
+        
+
+
+
+
+  
+    <script async type="text/javascript" src="/plugins/valine.min.js" onload="loadValineSuc(this)"></script>
+  
+
+  <div id="vcomments"></div>
+
+  <script>
+    function loadValineSuc() {
+      new Valine({
+        el: '#vcomments',
+        appId: 'yvNS5mz8aI97Agw7mfdvOwAr-9Nh9j0Va',
+        appKey: 'j0wtAiNMv4vT5Ta9FE027oCV',
+        placeholder: '请输入关键字... 留下你的脚步...',
+        avatar: 'mp',
+        lang: 'zh-CN'
+      })
+    }
+  </script>
+
+
+
+
       </div>
     
   </div>
-  <nav class="post-navigation">
-    
-      <a href="/page/2/"><i class="iconfont icon-angleleft"></i></a>
-    
-    <span class="page-num">3 / 4</span>
-    
-      <a href="/page/4/"><i class="iconfont icon-angleright"></i></a>
-    
-  </nav>
-</div>
+
 
         
 <div class="footer">

@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-04-16 23:58:51
+          2024-04-18 16:42:43
         </span>
         
       </div>
@@ -254,7 +254,66 @@
 <li>写数据双写，读数据校验新老介质数据是否一样，如果不一样，则用老数据进行修复</li>
 <li>存储迁移完毕，数据切换</li>
 </ol>
-<h1 id="持久化内存是啥"><a href="#持久化内存是啥" class="headerlink" title="持久化内存是啥"></a>持久化内存是啥</h1>
+<h1 id="持久化内存"><a href="#持久化内存" class="headerlink" title="持久化内存"></a>持久化内存</h1><p>核心参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://zhuanlan.zhihu.com/p/391089447">https://zhuanlan.zhihu.com/p/391089447</a></p>
+<ul>
+<li>大：目前持久内存单条内存容量最大可以达到 512 GB，而目前服务器单条内存一般最多到 32&#x2F;64 GB。也就是说，单台服务器使用持久内存可以轻松到达 TB 级别的内存容量。另一方面，单位价格来说，持久内存为普通内存的一半左右。</li>
+<li>快：既然也号称为内存，那必然不能慢。可以看到，持久内存相比较于普通 SSD 有1-2个数量级的延迟性能优势，相比较于硬盘优势更加巨大。当然对比与DRAM，其会有一定的性能差距。但是实际使用中由于性能瓶颈不一定在内存上，所以一般不会有特别明显的差距（一般性能衰退在一倍以内）。</li>
+<li>持久性：通俗来说，就是持久内存有跟硬盘一样的特性，断电以后重启，内存中的数据依然存在。此项特性可以说是秒杀内存，内存中的数据我们都知道断电或者程序以外退出以后就不复存在。此项特性使得持久内存即可以当做一个高速持久化设备使用，也可以满足内存应用某些场景下的快速恢复的需求。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>带宽</th>
+<th>延迟</th>
+<th>服务器典型内存容量</th>
+<th>持久化？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>硬盘</td>
+<td>100 MB&#x2F;sec</td>
+<td>10 ms</td>
+<td>&gt; 10 TB</td>
+<td>是</td>
+</tr>
+<tr>
+<td>硬盘（RAID-5）</td>
+<td>400 MB&#x2F;sec</td>
+<td>10 ms</td>
+<td>&gt; 10 TB</td>
+<td>是</td>
+</tr>
+<tr>
+<td>SATA SSD</td>
+<td>500 MB&#x2F;sec</td>
+<td>200 us</td>
+<td>10 TB</td>
+<td>是</td>
+</tr>
+<tr>
+<td>NVMe SSD</td>
+<td>2.5 GB&#x2F;sec</td>
+<td>100 us</td>
+<td>10 TB</td>
+<td>是</td>
+</tr>
+<tr>
+<td>PMem</td>
+<td>50 GB&#x2F;sec</td>
+<td>1 us</td>
+<td>3 TB</td>
+<td>是</td>
+</tr>
+<tr>
+<td>DDR4</td>
+<td>100 GB&#x2F;sec</td>
+<td>100 ns</td>
+<td>512 GB</td>
+<td>否</td>
+</tr>
+</tbody></table>
+
       </div>
       
         <div class="prev-or-next">
@@ -269,11 +328,16 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-04-16 23:58:51
+              2024-04-18 16:42:43
             </span>
             
           </div>
           <div class="post-foot-prev">
+            
+              <a href="/post/62811/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
             
           </div>
         </div>
@@ -287,7 +351,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-text">方案选型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E7%9A%84%E5%85%B3%E6%B3%A8%E7%BB%B4%E6%8A%A4"><span class="toc-text">不同场景的关注维护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E9%A1%B9%E7%9B%AE"><span class="toc-text">新项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QQ%E7%9B%B4%E6%92%AD"><span class="toc-text">QQ直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOW%E7%9B%B4%E6%92%AD"><span class="toc-text">NOW直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E4%BF%A1"><span class="toc-text">微信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E8%BF%81%E7%A7%BB"><span class="toc-text">关注迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%86%85%E5%AD%98%E6%98%AF%E5%95%A5"><span class="toc-text">持久化内存是啥</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-text">方案选型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E7%9A%84%E5%85%B3%E6%B3%A8%E7%BB%B4%E6%8A%A4"><span class="toc-text">不同场景的关注维护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E9%A1%B9%E7%9B%AE"><span class="toc-text">新项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QQ%E7%9B%B4%E6%92%AD"><span class="toc-text">QQ直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOW%E7%9B%B4%E6%92%AD"><span class="toc-text">NOW直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E4%BF%A1"><span class="toc-text">微信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E8%BF%81%E7%A7%BB"><span class="toc-text">关注迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%86%85%E5%AD%98"><span class="toc-text">持久化内存</span></a></li></ol>
       
     </div>
   </div>

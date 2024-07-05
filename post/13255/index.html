@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-04-17 13:11:13
+          2024-07-05 22:43:52
         </span>
         
               <span class="post-tags">
@@ -333,7 +333,90 @@
 <td>300000</td>
 </tr>
 </tbody></table>
-<h1 id="kafka事务"><a href="#kafka事务" class="headerlink" title="kafka事务"></a>kafka事务</h1>
+<h1 id="kafka事务"><a href="#kafka事务" class="headerlink" title="kafka事务"></a>kafka事务</h1><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://it-blog-cn.com/blogs/qmq/transaction.html">https://it-blog-cn.com/blogs/qmq/transaction.html</a></p>
+<h2 id="producer"><a href="#producer" class="headerlink" title="producer"></a>producer</h2><ul>
+<li>At most once：消息发送至多一次；ack&#x3D;0 </li>
+<li>At least once：消息发送至少一次；ack&#x3D;1或者ack&#x3D;all</li>
+<li>Exactly once：消息恰好只发送一次（幂等）；enable.idempotence&#x3D;true &amp;&amp; ack&#x3D;all</li>
+</ul>
+<p>producer怎么做到幂等：</p>
+<ol>
+<li>pid: producer创建的时候，基于主题和分片生成唯一ID，即关联了这个producer会往这个topic的这个partition发数据</li>
+<li>Sequence Numbler: 记录下当前producer在当前topic的当前的partition的序号，新的只有比老的大1（SN_new &#x3D; SN_old + 1）才允许写入，否则报错</li>
+</ol>
+<p>综上，可以做到同一个producer在同一个topic的同一个partition的幂等性，进而实现全局的幂等。简单来说就是用一个唯一ID，来保证这个ID是唯一递增的，进而保证幂等。</p>
+<h2 id="consumer"><a href="#consumer" class="headerlink" title="consumer"></a>consumer</h2><ul>
+<li>At most once：消息消费至多一次；<ul>
+<li>enable.auto.commit&#x3D;true：后台定时提交offset；</li>
+<li>auto.commit.interval.ms，后台提交offset的时间间隔</li>
+</ul>
+</li>
+<li>At least once：消息消费至少一次；<ul>
+<li>enable.auto.commit&#x3D;false：禁止后台自动提交offset</li>
+<li>手动调用 consumer.commitSync()来提交offset</li>
+</ul>
+</li>
+<li>Exactly once：消息恰好只消费一次（幂等）；<ul>
+<li>isolation.level&#x3D;read_committed</li>
+<li>isolation.level&#x3D;read_uncommitted</li>
+</ul>
+</li>
+</ul>
+<h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><p>producer基于事务操作提供的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 初始化事务</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">initTransactions</span><span class="params">()</span>;</span><br><span class="line"><span class="comment">// 开启事务</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">beginTransaction</span><span class="params">()</span> <span class="keyword">throws</span> ProducerFencedException ;</span><br><span class="line"><span class="comment">// 在事务内提交已经消费的偏移量</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendOffsetsToTransaction</span><span class="params">(Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets,</span></span><br><span class="line"><span class="params">                                     String consumerGroupId)</span> <span class="keyword">throws</span> ProducerFencedException ;</span><br><span class="line"><span class="comment">// 提交事务</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">commitTransaction</span><span class="params">()</span> <span class="keyword">throws</span> ProducerFencedException;</span><br><span class="line"><span class="comment">// 丢弃事务</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">abortTransaction</span><span class="params">()</span> <span class="keyword">throws</span> ProducerFencedException ;</span><br></pre></td></tr></table></figure>
+<p>producer基于事务操作提供的示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">KafkaProducer</span> <span class="variable">producer</span> <span class="operator">=</span> createKafkaProducer(  <span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;localhost:9092&quot;</span>,  <span class="string">&quot;transactional.id”, “my-transactional-id&quot;</span>);</span><br><span class="line">producer.initTransactions();</span><br><span class="line">producer.beginTransaction();</span><br><span class="line">producer.send(<span class="string">&quot;outputTopic&quot;</span>, <span class="string">&quot;message1&quot;</span>);</span><br><span class="line">producer.send(<span class="string">&quot;outputTopic&quot;</span>, <span class="string">&quot;message2&quot;</span>);</span><br><span class="line">producer.commitTransaction();</span><br></pre></td></tr></table></figure>
+
+<p>producer链路大致如下：上文中的幂等只能保证当前producer在当前topic的当前分片是幂等的，无法做到全局性的，所以要做到幂等，kafka引入了<code>Tranaction Coordination</code>来做全局的管理，<code>producer.beginTransaction();</code>就是像<code>Tranaction Coordination</code>请求的ID的</p>
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202407052117526.png" width=600px/>
+
+
+<p>producer在<code>commit</code>之前，数据都是<code>uncommited</code>状态的，<code>commit</code>之后，数据都是<code>commited</code>状态的；consumer基于<code>isolation.level=read_committed</code>配置决定消费的数据是<code>uncommited</code>还是<code>commited</code></p>
+<h1 id="kafka参数"><a href="#kafka参数" class="headerlink" title="kafka参数"></a>kafka参数</h1><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>acks</td>
+<td>produce的确认机制 0：不用确认 1:ISR中一个确认 -1\all: ISR所有确认</td>
+</tr>
+<tr>
+<td>min.insync.replicas</td>
+<td>最小同步的副本数</td>
+</tr>
+<tr>
+<td>replica.lag.time.max.ms</td>
+<td>同步的timeout时间，超过该时间，踢出ISR</td>
+</tr>
+<tr>
+<td>retries</td>
+<td>produce重试次数，超过该值，抛出异常，默认int最大值</td>
+</tr>
+<tr>
+<td>enable.idempotence</td>
+<td>是否开启幂等</td>
+</tr>
+<tr>
+<td>max.in.flight.requests.per.connection</td>
+<td>生产者在收到服务器晌应之前可以发送多少个消息，越大内存占用越大，超过该值，则让按照时间顺序淘汰最先进来的数据，让其重试</td>
+</tr>
+<tr>
+<td>buffer.memory</td>
+<td>缓存区大小，请求进来到写入磁盘的缓存大小，超时则直接报错重试</td>
+</tr>
+<tr>
+<td>max.block.ms</td>
+<td>在buffer.memory等待的timeout</td>
+</tr>
+<tr>
+<td>compression.type</td>
+<td>数据压缩类型，默认none，可选snappy 、gzip 、lz4</td>
+</tr>
+</tbody></table>
+
       </div>
       
         <div class="prev-or-next">
@@ -348,7 +431,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-04-17 13:11:13
+              2024-07-05 22:43:52
             </span>
             
                   <span class="post-tags">
@@ -382,7 +465,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-amp-%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">kafka数据一致性 &amp; 主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">同步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">异步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#follower%E6%95%85%E9%9A%9C"><span class="toc-text">follower故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader%E6%95%85%E9%9A%9C"><span class="toc-text">leader故障</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E3%80%81%E6%B6%88%E8%B4%B9commit%E6%96%B9%E5%BC%8F"><span class="toc-text">生产、消费commit方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E9%A1%BA%E5%BA%8F%E8%AF%BB%E5%86%99"><span class="toc-text">kafka顺序读写</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E9%A1%BA%E5%BA%8F%EF%BC%9A"><span class="toc-text">全局顺序：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E6%9C%89%E5%BA%8F"><span class="toc-text">局部有序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%86%E5%8C%BA%E5%8F%98%E6%9B%B4"><span class="toc-text">kafka分区变更</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%94%9F%E4%BA%A7%E5%8F%91%E5%B8%83%E8%BD%AE%E8%AF%A2"><span class="toc-text">kafka生产发布轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer%EF%BC%9A"><span class="toc-text">producer：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer%EF%BC%9A"><span class="toc-text">consumer：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E4%BA%8B%E5%8A%A1"><span class="toc-text">kafka事务</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-amp-%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">kafka数据一致性 &amp; 主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">同步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">异步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#follower%E6%95%85%E9%9A%9C"><span class="toc-text">follower故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader%E6%95%85%E9%9A%9C"><span class="toc-text">leader故障</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E3%80%81%E6%B6%88%E8%B4%B9commit%E6%96%B9%E5%BC%8F"><span class="toc-text">生产、消费commit方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E9%A1%BA%E5%BA%8F%E8%AF%BB%E5%86%99"><span class="toc-text">kafka顺序读写</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E9%A1%BA%E5%BA%8F%EF%BC%9A"><span class="toc-text">全局顺序：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E6%9C%89%E5%BA%8F"><span class="toc-text">局部有序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%86%E5%8C%BA%E5%8F%98%E6%9B%B4"><span class="toc-text">kafka分区变更</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%94%9F%E4%BA%A7%E5%8F%91%E5%B8%83%E8%BD%AE%E8%AF%A2"><span class="toc-text">kafka生产发布轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer%EF%BC%9A"><span class="toc-text">producer：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer%EF%BC%9A"><span class="toc-text">consumer：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E4%BA%8B%E5%8A%A1"><span class="toc-text">kafka事务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer"><span class="toc-text">producer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer"><span class="toc-text">consumer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-text">事务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%8F%82%E6%95%B0"><span class="toc-text">kafka参数</span></a></li></ol>
       
     </div>
   </div>

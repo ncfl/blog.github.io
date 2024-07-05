@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-04-15 21:02:16
+          2024-06-06 21:16:59
         </span>
         
               <span class="post-tags">
@@ -288,10 +288,10 @@
 <li>订阅mysql的binlog，进而达到数据最终一致性</li>
 </ul>
 </li>
+<li>需要更加引用第三方的组件，增加的维护成本和系统的不确定性，但是①这样可以快速达到数据的一致性，且同时两个组件发生问题的概率不大，且都自带重试机制②引入缓存是为了加快系统的响应，且mysql底层由于隔离机制的问题，也可能导致数据的不一致性，如果要既要追求性能，也要保证实时一致，几乎是不可能的。③一致性可以通过数据库的<code>Serializable</code>，或者redis加锁，或者<code>raft</code> <code>Paxos</code>等实现，但是性能都不佳</li>
 </ul>
 </li>
 </ul>
-<p>    - 需要更加引用第三方的组件，增加的维护成本和系统的不确定性，但是①这样可以快速达到数据的一致性，且同时两个组件发生问题的概率不大，且都自带重试机制②引入缓存是为了加快系统的响应，且mysql底层由于隔离机制的问题，也可能导致数据的不一致性，如果要既要追求性能，也要保证实时一致，几乎是不可能的。③一致性可以通过数据库的<code>Serializable</code>，或者redis加锁，或者<code>raft</code> <code>Paxos</code>等实现，但是性能都不佳</p>
 <h2 id="强一致性算法"><a href="#强一致性算法" class="headerlink" title="强一致性算法"></a>强一致性算法</h2><h3 id="拜占庭问题"><a href="#拜占庭问题" class="headerlink" title="拜占庭问题"></a>拜占庭问题</h3><p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.youtube.com/watch?v=e9KVmyI1eCg&t=1066s">https://www.youtube.com/watch?v=e9KVmyI1eCg&amp;t=1066s</a></p>
 <p>多个人去攻打一座城，超过半数的人去打才能打赢，几个人一起讨论下要不要攻打。<br><img src=https://img.ncfl.tech/202403282352574.jpg width=700px/></p>
 <h3 id="ZAB-raft-Paxos视频"><a href="#ZAB-raft-Paxos视频" class="headerlink" title="ZAB raft Paxos视频"></a>ZAB raft Paxos视频</h3><p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.bilibili.com/video/BV1TW411M7Fx/?spm_id_from=333.337.search-card.all.click&vd_source=5049cdb7864cfa3b2891e8ab98480c55">https://www.bilibili.com/video/BV1TW411M7Fx/?spm_id_from=333.337.search-card.all.click&amp;vd_source=5049cdb7864cfa3b2891e8ab98480c55</a></p>
@@ -404,6 +404,23 @@
 </li>
 </ul>
 <p>ps: 个人理解，mongodb是MYSQL的FULL_TEXT的完整版优化版本</p>
+<h1 id="redis为啥用跳表，innodb为啥用B-树"><a href="#redis为啥用跳表，innodb为啥用B-树" class="headerlink" title="redis为啥用跳表，innodb为啥用B+树"></a>redis为啥用跳表，innodb为啥用B+树</h1><ul>
+<li>innodb用B+树<ul>
+<li>B+ tree是多叉树结构</li>
+<li>三层左右就可以存千万级别的数据量，跳表千万级别数据量不止3层</li>
+<li>一次查询，进行少数的IO便可做获取到数据</li>
+<li>查询性能较好</li>
+</ul>
+</li>
+<li>redis用跳表    <ul>
+<li>跳表是链表结构</li>
+<li>B+树写入性能较差，需要旋转节点等操作</li>
+<li>跳表实现起来更加简单</li>
+<li>跳表写入性能较好</li>
+<li>读数据时不用考虑磁盘IO问题，且没有人会在redis缓存千万级别数据</li>
+</ul>
+</li>
+</ul>
 
       </div>
       
@@ -419,7 +436,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-04-15 21:02:16
+              2024-06-06 21:16:59
             </span>
             
                   <span class="post-tags">
@@ -453,7 +470,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-text">存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%BA%E5%88%AB"><span class="toc-text">区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E6%8B%A9"><span class="toc-text">选择</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#InnoDB%E4%B8%BA%E5%95%A5%E7%94%A8B-%E6%A0%91"><span class="toc-text">InnoDB为啥用B+树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E6%9C%BA%E5%88%B6"><span class="toc-text">事务隔离机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7%EF%BC%9AACID"><span class="toc-text">事务特性：ACID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%84%8F%E8%AF%BB%EF%BC%8C%E5%B9%BB%E8%AF%BB%EF%BC%8C%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB"><span class="toc-text">脏读，幻读，不可重复读</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-text">比较</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95"><span class="toc-text">索引</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E7%B1%BB%E5%9E%8B"><span class="toc-text">索引类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E6%80%8E%E4%B9%88%E7%94%A8"><span class="toc-text">索引怎么用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#count-1-%E5%92%8Ccount"><span class="toc-text">count(1)和count(*)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-redis%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">mysql redis数据一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%EF%BC%9A"><span class="toc-text">核心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88"><span class="toc-text">方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95"><span class="toc-text">强一致性算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%97%AE%E9%A2%98"><span class="toc-text">拜占庭问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB-raft-Paxos%E8%A7%86%E9%A2%91"><span class="toc-text">ZAB raft Paxos视频</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2-amp-%E4%B8%BB%E4%BB%8E%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="toc-text">mysql主从切换 &amp; 主从数据同步</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B"><span class="toc-text">复制类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E5%88%B6%E6%96%B9%E5%BC%8F"><span class="toc-text">复制方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2%EF%BC%88%E9%AB%98%E5%8F%AF%E7%94%A8%EF%BC%89"><span class="toc-text">主从切换（高可用）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-VS-mongoDB"><span class="toc-text">mysql VS mongoDB</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-text">存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%BA%E5%88%AB"><span class="toc-text">区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E6%8B%A9"><span class="toc-text">选择</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#InnoDB%E4%B8%BA%E5%95%A5%E7%94%A8B-%E6%A0%91"><span class="toc-text">InnoDB为啥用B+树</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E6%9C%BA%E5%88%B6"><span class="toc-text">事务隔离机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7%EF%BC%9AACID"><span class="toc-text">事务特性：ACID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%84%8F%E8%AF%BB%EF%BC%8C%E5%B9%BB%E8%AF%BB%EF%BC%8C%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB"><span class="toc-text">脏读，幻读，不可重复读</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-text">比较</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95"><span class="toc-text">索引</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E7%B1%BB%E5%9E%8B"><span class="toc-text">索引类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E6%80%8E%E4%B9%88%E7%94%A8"><span class="toc-text">索引怎么用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#count-1-%E5%92%8Ccount"><span class="toc-text">count(1)和count(*)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-redis%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">mysql redis数据一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%EF%BC%9A"><span class="toc-text">核心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%88"><span class="toc-text">方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95"><span class="toc-text">强一致性算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%9C%E5%8D%A0%E5%BA%AD%E9%97%AE%E9%A2%98"><span class="toc-text">拜占庭问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZAB-raft-Paxos%E8%A7%86%E9%A2%91"><span class="toc-text">ZAB raft Paxos视频</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2-amp-%E4%B8%BB%E4%BB%8E%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="toc-text">mysql主从切换 &amp; 主从数据同步</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B"><span class="toc-text">复制类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E5%88%B6%E6%96%B9%E5%BC%8F"><span class="toc-text">复制方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2%EF%BC%88%E9%AB%98%E5%8F%AF%E7%94%A8%EF%BC%89"><span class="toc-text">主从切换（高可用）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql-VS-mongoDB"><span class="toc-text">mysql VS mongoDB</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis%E4%B8%BA%E5%95%A5%E7%94%A8%E8%B7%B3%E8%A1%A8%EF%BC%8Cinnodb%E4%B8%BA%E5%95%A5%E7%94%A8B-%E6%A0%91"><span class="toc-text">redis为啥用跳表，innodb为啥用B+树</span></a></li></ol>
       
     </div>
   </div>

@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-03-24 17:24:56
+          2024-08-01 12:13:29
         </span>
         
               <span class="post-tags">
@@ -344,7 +344,81 @@
 <li>总结：性能影响不大，且不会成为瓶颈。考虑先优化函数实现，再考虑调用开销。</li>
 </ul>
 <p>JAVA &amp; GO泛型原理比较：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://jeffdingzone.com/2022/06/">https://jeffdingzone.com/2022/06/</a></p>
-<h1 id="9、GO1-20新特性-slice转数组，但是会指向同一个地址"><a href="#9、GO1-20新特性-slice转数组，但是会指向同一个地址" class="headerlink" title="9、GO1.20新特性-slice转数组，但是会指向同一个地址"></a>9、GO1.20新特性-slice转数组，但是会指向同一个地址</h1>
+<h1 id="9、Go版本新特性"><a href="#9、Go版本新特性" class="headerlink" title="9、Go版本新特性"></a>9、Go版本新特性</h1><ul>
+<li>V1.18 	引入泛型 []T</li>
+<li>v1.20 	<code>rand.Seed()</code>不用调用了，直接调用<code>rand.Int(100)</code>即可</li>
+<li>v1.21 	基于泛型，引入类似<code>min</code> \ <code>max</code> 等方法，类似<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Ordered <span class="keyword">interface</span> &#123;</span><br><span class="line">	~<span class="type">int</span> | ~<span class="type">int8</span> | ~<span class="type">int16</span> | ~<span class="type">int32</span> | ~<span class="type">int64</span> |</span><br><span class="line">		~<span class="type">uint</span> | ~<span class="type">uint8</span> | ~<span class="type">uint16</span> | ~<span class="type">uint32</span> | ~<span class="type">uint64</span> | ~<span class="type">uintptr</span> |</span><br><span class="line">		~<span class="type">float32</span> | ~<span class="type">float64</span> |</span><br><span class="line">		~<span class="type">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>v1.22 	for循环，每次的值为拷贝的值，无需再拷贝给临时变量或者通过传参的方式来做<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt;= <span class="number">10</span>; i++ &#123;</span><br><span class="line">		<span class="comment">// 输出 0,1,2,3,4,5,6,7,8,9</span></span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			fmt.Println(i)</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="10、优雅关闭chan"><a href="#10、优雅关闭chan" class="headerlink" title="10、优雅关闭chan"></a>10、优雅关闭chan</h1><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://go101.org/article/channel-closing.html">https://go101.org/article/channel-closing.html</a></p>
+<ul>
+<li>可能造成问题<ul>
+<li>重复关闭，导致panic</li>
+<li>错误关闭，导致producer还在往chan里面写数据，导致panic</li>
+</ul>
+</li>
+<li>consumer关闭是优雅的关闭，同时为了保证producer，最好在发送的时候,defer recover做一下兜底</li>
+<li>可以采用<code>sync.Once</code>或<code>sync.Mutex</code>避免关闭的时候重复或者冲突，（个人认为atomic也行）</li>
+<li>分为一下四个场景<ul>
+<li>单producer，单consumer：producer生产完成之后直接关闭即可</li>
+<li>单producer，多consumer：producer生产完成之后直接关闭即可</li>
+<li>多producer，单consumer：consumer消费完数据之后，close(stopchan)，producer监听stopchan，如果stopchan被关闭了，则退出当前producer</li>
+<li>多producer，多consumer：consumer消费完数据之后，close(stopchan)，producer监听stopchan，如果stopchan被关闭了，则退出当前producer</li>
+</ul>
+</li>
+<li>判断chan是否被关闭<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">IsClosed</span><span class="params">(ch &lt;-<span class="keyword">chan</span> T)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-ch:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    <span class="comment">// 核心区别在这，如果没有default，会一直在上面等待，有了default就不会等待了</span></span><br><span class="line">    <span class="comment">// 一旦close或者chan里面有只，就会直接走上面的逻辑</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">	    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="11、rpcx-VS-grpc"><a href="#11、rpcx-VS-grpc" class="headerlink" title="11、rpcx VS grpc"></a>11、rpcx VS grpc</h1><ul>
+<li><p>1、 设计和背景</p>
+<ul>
+<li>gRPC 是由 Google 开发的一个高性能、开源和通用的 RPC 框架。它支持多种编程语言，包括 C、Java、Go</li>
+<li>rpcx 是 Go 语言生态圈的 RPC 框架。它利用 Go 语言的并发特性和简洁语法，实现高效的分布式 RPC 服务。</li>
+</ul>
+</li>
+<li><p>2、 语言支持</p>
+<ul>
+<li>gRPC 支持跨语言调用，目前支持的语言类型包括 C++、Java、Go、Python、Ruby、Node.js、Android、C#、PHP 和 Objective-C。</li>
+<li>rpcx 主要使用 Go 语言开发，但也支持通过 HTTP 调用，使得其他编程语言也可以调用 rpcx 服务。</li>
+</ul>
+</li>
+<li><p>3、 性能</p>
+<ul>
+<li>gRPC 采用 ProtoBuf 序列化协议，性能优于其他协议。</li>
+<li>rpcx 在性能测试中表现优异，尤其是在高并发场景下，吞吐率和响应时间都优于许多其他框架。</li>
+</ul>
+</li>
+<li><p>4、 服务治理</p>
+<ul>
+<li>gRPC 目前不直接支持分布式服务治理，需要额外的开发来实现，不直接支持多种注册中心和管理中心。</li>
+<li>rpcx 一样，支持服务治理，包括服务发现、负载均衡和容错机制、支持多种注册中心和管理中心。</li>
+</ul>
+</li>
+<li><p>5、 序列化协议</p>
+<ul>
+<li>gRPC 只支持 ProtoBuf 序列化协议。</li>
+<li>rpcx 支持多种序列化框架，包括 Hessian2、Json 等，并且可以扩展。</li>
+</ul>
+</li>
+</ul>
+<h1 id="12、尾递归"><a href="#12、尾递归" class="headerlink" title="12、尾递归"></a>12、尾递归</h1><p>普通递归，会导致栈空间增加，进而导致栈空间溢出，代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">factorial</span>(<span class="params">n</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (n === <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> n * <span class="title function_">factorial</span>(n - <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">factorial</span>(<span class="number">5</span>) <span class="comment">// 120</span></span><br></pre></td></tr></table></figure>
+
+<p>尾递归，直接不再依赖上游，直接return即可，类似下面，不再相互依赖栈空间，<code>factorial(n, total)</code>就是<code>factorial(n - 1, n * total)</code>，直接替换即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function factorial(n, total) &#123;</span><br><span class="line">  if (n === 1) return total;</span><br><span class="line">  return factorial(n - 1, n * total);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">factorial(5, 1) // 120</span><br></pre></td></tr></table></figure>
+
+<p>尾递归好处：</p>
+<ul>
+<li>性能上会有提升，取消了栈空间依赖进而提升性能</li>
+<li>不会出现占空间溢出</li>
+</ul>
+<p>Golang为啥不用尾递归优化：</p>
+<ul>
+<li>Golang追求设计简洁，尾递归相对比较复杂，在一定程度上可能导致增加编译成本，降低编译器的可维护性</li>
+<li>性能考虑，在很多场景中，非尾递归的性能差异影响不大，尤其是递归量不大时，几乎无差别</li>
+<li>垃圾回收，尾递归会增加垃圾回收机制的成本和性能，对于panic defer等函数的调用等也有影响</li>
+<li>可以采用等价的函数来进行实现尾递归，比如for循环或者显式栈来避免使用调用栈</li>
+</ul>
+
       </div>
       
         <div class="prev-or-next">
@@ -359,7 +433,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-03-24 17:24:56
+              2024-08-01 12:13:29
             </span>
             
                   <span class="post-tags">
@@ -393,7 +467,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-text">1、垃圾回收机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%97%B6%E6%9C%BA"><span class="toc-text">触发时机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E6%B3%95"><span class="toc-text">标记法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A0-%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%EF%BC%9A"><span class="toc-text">① 标记算法：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A1-%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95%EF%BC%9A"><span class="toc-text">② 三色标记法：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-text">2、内存分配</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mspan%EF%BC%9A"><span class="toc-text">mspan：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mspanclass%EF%BC%9A"><span class="toc-text">mspanclass：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mcache%EF%BC%9A"><span class="toc-text">mcache：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mheap%EF%BC%9A"><span class="toc-text">mheap：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3%E3%80%81%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="toc-text">3、内存对齐</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4%E3%80%81%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BGMP-%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">4、内存模型GMP(调度器)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="toc-text">背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="toc-text">优势：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8%EF%BC%9A"><span class="toc-text">老的调度器：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">新的调度器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5%E3%80%81hashMap%E5%8E%9F%E7%90%86"><span class="toc-text">5、hashMap原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3hash%E5%86%B2%E7%AA%81"><span class="toc-text">怎么解决hash冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9"><span class="toc-text">扩容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%89%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">等量扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">增量扩容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A0%E5%BA%8F%E7%9A%84"><span class="toc-text">为什么是无序的</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6%E3%80%81chan"><span class="toc-text">6、chan</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="toc-text">内部结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A"><span class="toc-text">应用场景：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7%E3%80%81GO%E7%9A%84%E5%A0%86%E6%A0%88%E5%9B%BE"><span class="toc-text">7、GO的堆栈图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8%E3%80%81GO1-18%E6%96%B0%E7%89%B9%E6%80%A7-%E6%B3%9B%E5%9E%8B"><span class="toc-text">8、GO1.18新特性-泛型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#9%E3%80%81GO1-20%E6%96%B0%E7%89%B9%E6%80%A7-slice%E8%BD%AC%E6%95%B0%E7%BB%84%EF%BC%8C%E4%BD%86%E6%98%AF%E4%BC%9A%E6%8C%87%E5%90%91%E5%90%8C%E4%B8%80%E4%B8%AA%E5%9C%B0%E5%9D%80"><span class="toc-text">9、GO1.20新特性-slice转数组，但是会指向同一个地址</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="toc-text">1、垃圾回收机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E6%97%B6%E6%9C%BA"><span class="toc-text">触发时机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E6%B3%95"><span class="toc-text">标记法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A0-%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95%EF%BC%9A"><span class="toc-text">① 标记算法：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%91%A1-%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95%EF%BC%9A"><span class="toc-text">② 三色标记法：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-text">2、内存分配</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mspan%EF%BC%9A"><span class="toc-text">mspan：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mspanclass%EF%BC%9A"><span class="toc-text">mspanclass：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mcache%EF%BC%9A"><span class="toc-text">mcache：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mheap%EF%BC%9A"><span class="toc-text">mheap：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3%E3%80%81%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="toc-text">3、内存对齐</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4%E3%80%81%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BGMP-%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">4、内存模型GMP(调度器)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%EF%BC%9A"><span class="toc-text">背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="toc-text">优势：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8%EF%BC%9A"><span class="toc-text">老的调度器：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E7%9A%84%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">新的调度器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5%E3%80%81hashMap%E5%8E%9F%E7%90%86"><span class="toc-text">5、hashMap原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3hash%E5%86%B2%E7%AA%81"><span class="toc-text">怎么解决hash冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9"><span class="toc-text">扩容</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%89%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">等量扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E9%87%8F%E6%89%A9%E5%AE%B9"><span class="toc-text">增量扩容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A0%E5%BA%8F%E7%9A%84"><span class="toc-text">为什么是无序的</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6%E3%80%81chan"><span class="toc-text">6、chan</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="toc-text">内部结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A"><span class="toc-text">应用场景：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7%E3%80%81GO%E7%9A%84%E5%A0%86%E6%A0%88%E5%9B%BE"><span class="toc-text">7、GO的堆栈图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8%E3%80%81GO1-18%E6%96%B0%E7%89%B9%E6%80%A7-%E6%B3%9B%E5%9E%8B"><span class="toc-text">8、GO1.18新特性-泛型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#9%E3%80%81Go%E7%89%88%E6%9C%AC%E6%96%B0%E7%89%B9%E6%80%A7"><span class="toc-text">9、Go版本新特性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#10%E3%80%81%E4%BC%98%E9%9B%85%E5%85%B3%E9%97%ADchan"><span class="toc-text">10、优雅关闭chan</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#11%E3%80%81rpcx-VS-grpc"><span class="toc-text">11、rpcx VS grpc</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#12%E3%80%81%E5%B0%BE%E9%80%92%E5%BD%92"><span class="toc-text">12、尾递归</span></a></li></ol>
       
     </div>
   </div>

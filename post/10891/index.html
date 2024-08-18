@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-04-18 16:42:43
+          2024-08-18 21:16:17
         </span>
         
       </div>
@@ -313,6 +313,25 @@
 <td>否</td>
 </tr>
 </tbody></table>
+<h1 id="持久化内存原理"><a href="#持久化内存原理" class="headerlink" title="持久化内存原理"></a>持久化内存原理</h1><h3 id="为啥快"><a href="#为啥快" class="headerlink" title="为啥快"></a>为啥快</h3><ul>
+<li>插在内存条卡槽上，所以具备了跟内存条几乎一样的优势<ol>
+<li>直接与CPU进行加交互，其他的存储介质几乎都是通过内存再与CPU交互的，所以速度快</li>
+<li>pmem和CPU一把比较近，很大程度上降低了电子信号传输的时间，所以速度快</li>
+<li>插在内存条卡槽上，接触的点比较多，传输的宽带比较大，所以速度快</li>
+<li>并发性，因为引脚多，固允许同时进行多个读写操作，提高了整体的数据处理速度，所以速度快</li>
+<li>pmem与CPU交互的通信协议与内存条保证了一致，避免了兼容问题和过度问题，所以速度快。（比如 跳过CPU，直接内存访问的DMA）</li>
+</ol>
+</li>
+<li>CPU cache line对齐，即是pmem与CPU上面的缓存可以做到一一对应，减少了二者的寻址的次数和时间，所以速度快</li>
+<li>不像传统磁盘的旋转寻道，不像ssd的闪存等技术，直接做电子的存储所以快</li>
+<li>3D XPoint这样的非易失性存储技术，比比传统NAND闪存更快，比DRAM稍慢点（如果要问这个是啥，直接怼回去）</li>
+<li><em><strong>不要说这一点</strong></em>：持久话内存有两种模式，一种就是当成内存条来用，性能也跟内存条（DRAM）差不多，一种是当成持久化设备来用，需要搭配内存条使用，就是为啥内存条:pmem&#x3D;1:8 1:16</li>
+</ul>
+<h3 id="怎么做到持久化-（核心是3D-XPoint技术，内容如下）"><a href="#怎么做到持久化-（核心是3D-XPoint技术，内容如下）" class="headerlink" title="怎么做到持久化 （核心是3D XPoint技术，内容如下）"></a>怎么做到持久化 （核心是3D XPoint技术，内容如下）</h3><ul>
+<li>存储单元变了：通过改变电阻的高低来保存数据，高电阻表是0，低电阻表示1，电阻的高低即是在断电了也是保存住的（从电容存储单元换成了电阻存储单元，跟材料学业相关）</li>
+<li>无需供电：内存条需要不断供电刷新来保证数据的状态，基于电阻则不需要一致刷新，写入即可，断电也可恢复</li>
+<li><em><strong>不要说PCM这种技术</strong></em>，也不要讲电容这种技术，PCM目前没有广泛使用，持久化用的是pmem，也就是3D XPoint，内存用的是DRAM，SSD固态用的是NAND；电容是内存条用的储存单元</li>
+</ul>
 
       </div>
       
@@ -328,7 +347,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-04-18 16:42:43
+              2024-08-18 21:16:17
             </span>
             
           </div>
@@ -351,7 +370,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-text">方案选型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E7%9A%84%E5%85%B3%E6%B3%A8%E7%BB%B4%E6%8A%A4"><span class="toc-text">不同场景的关注维护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E9%A1%B9%E7%9B%AE"><span class="toc-text">新项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QQ%E7%9B%B4%E6%92%AD"><span class="toc-text">QQ直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOW%E7%9B%B4%E6%92%AD"><span class="toc-text">NOW直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E4%BF%A1"><span class="toc-text">微信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E8%BF%81%E7%A7%BB"><span class="toc-text">关注迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%86%85%E5%AD%98"><span class="toc-text">持久化内存</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-text">方案选型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E5%9C%BA%E6%99%AF%E7%9A%84%E5%85%B3%E6%B3%A8%E7%BB%B4%E6%8A%A4"><span class="toc-text">不同场景的关注维护</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B0%E9%A1%B9%E7%9B%AE"><span class="toc-text">新项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QQ%E7%9B%B4%E6%92%AD"><span class="toc-text">QQ直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NOW%E7%9B%B4%E6%92%AD"><span class="toc-text">NOW直播</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E4%BF%A1"><span class="toc-text">微信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E8%BF%81%E7%A7%BB"><span class="toc-text">关注迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%86%85%E5%AD%98"><span class="toc-text">持久化内存</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%86%85%E5%AD%98%E5%8E%9F%E7%90%86"><span class="toc-text">持久化内存原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E5%95%A5%E5%BF%AB"><span class="toc-text">为啥快</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E5%81%9A%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96-%EF%BC%88%E6%A0%B8%E5%BF%83%E6%98%AF3D-XPoint%E6%8A%80%E6%9C%AF%EF%BC%8C%E5%86%85%E5%AE%B9%E5%A6%82%E4%B8%8B%EF%BC%89"><span class="toc-text">怎么做到持久化 （核心是3D XPoint技术，内容如下）</span></a></li></ol></li></ol></li></ol>
       
     </div>
   </div>

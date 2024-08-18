@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-07-05 22:43:52
+          2024-07-06 11:14:28
         </span>
         
               <span class="post-tags">
@@ -372,6 +372,96 @@
 
 
 <p>producer在<code>commit</code>之前，数据都是<code>uncommited</code>状态的，<code>commit</code>之后，数据都是<code>commited</code>状态的；consumer基于<code>isolation.level=read_committed</code>配置决定消费的数据是<code>uncommited</code>还是<code>commited</code></p>
+<h1 id="kafka延迟队列"><a href="#kafka延迟队列" class="headerlink" title="kafka延迟队列"></a>kafka延迟队列</h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202407061053484.webp" width=800px />
+
+<p>个人觉得的问题：</p>
+<ul>
+<li>时间粒度可控性差，取决于延迟队列的设计，设计越小则gap越小，但是对应的资源消耗越大</li>
+<li>必须保证投入消息的有序性，否则可能导致后面的消息有一定的滞后。假设30s往10s里面投递消息，正常来说是看第一条消息是否在10s内，如果是，则依次处理，直到满足条件的消息都处理完毕。如果投入消息不是有序的，第一条消息剩余时间29s,第二条消息剩余时间是1s,则会造成第二条消息delay30s处理</li>
+<li>可能存在消费不完的情况，假设某个时候，30s的队列内有1亿条数据，该1亿条数据无法在30s内消费完，则可能对业务产生影响，不过这个是所有延迟队列都可能的问题</li>
+</ul>
+<p>同样是个人觉得：延迟队列可以用zset来做，如果怕数据不持久化或者可回溯性，可以用mysql做backup，就是在写入zset的时候，往mysql里面也写入一份，或者在消耗zset的数据的时候，往mysql里面也写一份</p>
+<h1 id="消息队列的比较"><a href="#消息队列的比较" class="headerlink" title="消息队列的比较"></a>消息队列的比较</h1><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ActiveMq</th>
+<th>RabbitMq</th>
+<th>RocketMQ</th>
+<th>Kafka</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>成熟度</td>
+<td>成熟</td>
+<td>成熟</td>
+<td>比较成熟</td>
+<td>成熟的日志领域</td>
+</tr>
+<tr>
+<td>时效性</td>
+<td></td>
+<td>微秒级</td>
+<td>毫秒级</td>
+<td>毫秒级</td>
+</tr>
+<tr>
+<td>社区活跃度</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>单机吞吐量</td>
+<td>万级，吞吐量比RocketMQ和Kafka要低了一个数量级</td>
+<td>万级，吞吐量比RocketMQ和Kafka要低了一个数量级</td>
+<td>10万级，RocketMQ也是可以支撑高吞吐的一种MQ</td>
+<td>10万级别，这是kafka最大的优点，就是吞吐量高。一般配合大数据类的系统来进行实时数据计算、日志采集等场景</td>
+</tr>
+<tr>
+<td>topic数量对吞吐量的影响</td>
+<td></td>
+<td></td>
+<td>topic可以达到几百，几千个的级别，吞吐量会有较小幅度的下降这是RocketMQ的一大优势，在同等机器下，可以支撑大量的topic</td>
+<td>topic从几十个到几百个的时候，吞吐量会大幅度下降所以在同等机器下，kafka尽量保证topic数量不要过多。如果要支撑大规模topic，需要增加更多的机器资源</td>
+</tr>
+<tr>
+<td>可用性</td>
+<td>高，基于主从架构实现高可用性</td>
+<td>高，基于主从架构实现高可用性</td>
+<td>非常高，分布式架构</td>
+<td>非常高，kafka是分布式的，一个数据多个副本，少数机器宕机，不会丢失数据，不会导致不可用</td>
+</tr>
+<tr>
+<td>消息可靠性</td>
+<td>有较低的概率丢失数据</td>
+<td></td>
+<td>经过参数优化配置，可以做到0丢失</td>
+<td>经过参数优化配置，消息可以做到0丢失</td>
+</tr>
+<tr>
+<td>功能支持</td>
+<td>MQ领域的功能极其完备</td>
+<td>基于erlang开发，所以并发能力很强，性能极其好，延时很低</td>
+<td>MQ功能较为完善，还是分布式的，扩展性好</td>
+<td>功能较为简单，主要支持简单的MQ功能，在大数据领域的实时计算以及日志采集被大规模使用，是事实上的标准</td>
+</tr>
+<tr>
+<td>优劣势总结</td>
+<td>非常成熟，功能强大，在业内大量的公司以及项目中都有应用偶尔会有较低概率丢失消息而且现在社区以及国内应用都越来越少，官方社区现维护越来越少，几个月才发布一个版本而且确实主要是基于解耦和异步来用的，较少在大规模吞吐的场景中使用</td>
+<td>rlang语言开发，性能极其好，延时很低；吞吐量到万级，MQ功能比较完备而且开源提供的管理界面非常棒，用起来很好用社区相对比较活跃，几乎每个月都发布几个版本分在国内一些互联网公司近几年用rabbitmq也比较多一些但是问题也是显而易见的，RabbitMQ确实吞吐量会低一些，这是因为他做的实现机制比较重。而且erlang开发，国内有几个公司有实力做erlang源码级别的研究和定制？如果说你没这个实力的话，确实偶尔会有一些问题，你很难去看懂源码，你公司对这个东西的掌控很弱，基本职能依赖于开源社区的快速维护和修复bug。而且rabbitmq集群动态扩展会很麻烦，不过这个我觉得还好。其实主要是erlang语言本身带来的问题。很难读源码，很难定制和掌控。</td>
+<td>接口简单易用，而且毕竟在阿里大规模应用过，有阿里品牌保障日处理消息上百亿之多，可以做到大规模吞吐，性能也非常好，分布式扩展也很方便，社区维护还可以，可靠性和可用性都是ok的，还可以支撑大规模的topic数量，支持复杂MQ业务场景而且一个很大的优势在于，阿里出品都是java系的，我们可以自己阅读源码，定制自己公司的MQ，可以掌控社区活跃度相对较为一般，不过也还可以，文档相对来说简单一些，然后接口这块不是按照标准JMS规范走的有些系统要迁移需要修改大量代码还有就是阿里出台的技术，你得做好这个技术万一被抛弃，社区黄掉的风险，那如果你们公司有技术实力我觉得用RocketMQ挺好的</td>
+<td>kafka的特点其实很明显，就是仅仅提供较少的核心功能，但是提供超高的吞吐量，ms级的延迟，极高的可用性以及可靠性，而且分布式可以任意扩展同时kafka最好是支撑较少的topic数量即可，保证其超高吞吐量而且kafka唯一的一点劣势是有可能消息重复消费，那么对数据准确性会造成极其轻微的影响，在大数据领域中以及日志采集中，这点轻微影响可以忽略这个特性天然适合大数据实时计算以及日志收集</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>原生支持延迟队列等</td>
+<td></td>
+</tr>
+</tbody></table>
 <h1 id="kafka参数"><a href="#kafka参数" class="headerlink" title="kafka参数"></a>kafka参数</h1><table>
 <thead>
 <tr>
@@ -431,7 +521,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-07-05 22:43:52
+              2024-07-06 11:14:28
             </span>
             
                   <span class="post-tags">
@@ -465,7 +555,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-amp-%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">kafka数据一致性 &amp; 主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">同步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">异步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#follower%E6%95%85%E9%9A%9C"><span class="toc-text">follower故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader%E6%95%85%E9%9A%9C"><span class="toc-text">leader故障</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E3%80%81%E6%B6%88%E8%B4%B9commit%E6%96%B9%E5%BC%8F"><span class="toc-text">生产、消费commit方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E9%A1%BA%E5%BA%8F%E8%AF%BB%E5%86%99"><span class="toc-text">kafka顺序读写</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E9%A1%BA%E5%BA%8F%EF%BC%9A"><span class="toc-text">全局顺序：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E6%9C%89%E5%BA%8F"><span class="toc-text">局部有序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%86%E5%8C%BA%E5%8F%98%E6%9B%B4"><span class="toc-text">kafka分区变更</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%94%9F%E4%BA%A7%E5%8F%91%E5%B8%83%E8%BD%AE%E8%AF%A2"><span class="toc-text">kafka生产发布轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer%EF%BC%9A"><span class="toc-text">producer：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer%EF%BC%9A"><span class="toc-text">consumer：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E4%BA%8B%E5%8A%A1"><span class="toc-text">kafka事务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer"><span class="toc-text">producer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer"><span class="toc-text">consumer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-text">事务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%8F%82%E6%95%B0"><span class="toc-text">kafka参数</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BF%AB%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-text">快的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%9A%84%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">kafka的分区策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RangeAssignor%EF%BC%8C%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="toc-text">RangeAssignor，默认策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RoundRobinAssignor"><span class="toc-text">RoundRobinAssignor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#StickyAssignor%EF%BC%8C%E9%BB%8F%E6%80%A7%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">StickyAssignor，黏性分配策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7-amp-%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">kafka数据一致性 &amp; 主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">同步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%A4%8D%E5%88%B6"><span class="toc-text">异步复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="toc-text">主从切换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#follower%E6%95%85%E9%9A%9C"><span class="toc-text">follower故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#leader%E6%95%85%E9%9A%9C"><span class="toc-text">leader故障</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E3%80%81%E6%B6%88%E8%B4%B9commit%E6%96%B9%E5%BC%8F"><span class="toc-text">生产、消费commit方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-text">生产者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85"><span class="toc-text">消费者</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E9%A1%BA%E5%BA%8F%E8%AF%BB%E5%86%99"><span class="toc-text">kafka顺序读写</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E9%A1%BA%E5%BA%8F%EF%BC%9A"><span class="toc-text">全局顺序：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E6%9C%89%E5%BA%8F"><span class="toc-text">局部有序</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%86%E5%8C%BA%E5%8F%98%E6%9B%B4"><span class="toc-text">kafka分区变更</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E7%94%9F%E4%BA%A7%E5%8F%91%E5%B8%83%E8%BD%AE%E8%AF%A2"><span class="toc-text">kafka生产发布轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer%EF%BC%9A"><span class="toc-text">producer：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer%EF%BC%9A"><span class="toc-text">consumer：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-text">kafka删除策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E4%BA%8B%E5%8A%A1"><span class="toc-text">kafka事务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#producer"><span class="toc-text">producer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer"><span class="toc-text">consumer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-text">事务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97"><span class="toc-text">kafka延迟队列</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-text">消息队列的比较</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka%E5%8F%82%E6%95%B0"><span class="toc-text">kafka参数</span></a></li></ol>
       
     </div>
   </div>

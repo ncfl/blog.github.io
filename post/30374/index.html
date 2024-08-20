@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-06-06 21:17:38
+          2024-08-19 23:29:14
         </span>
         
               <span class="post-tags">
@@ -287,7 +287,7 @@ zset   -  压缩链表、跳表
 </ul>
 <h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>定义：记录redis的所有写操作，保存在持久化文件中</p>
 <p>相关配置如下：（因为不是直接写入文件，是写入到linux的缓存区，下列配置为从缓存区刷新到文件的时间间隔）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendfsync always #每次有数据修改发生时都会写入AOF文件。数据最安全，性能影响最大</span><br><span class="line">appendfsync everysec #每秒钟同步一次，该策略为AOF的缺省策略。可能是缺少1s的数据</span><br><span class="line">appendfsync no #从不同步，由操作系统决定何时刷新到文件。性能影响最小，数据安全性最差</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendfsync always #每次有数据修改发生时都会写入AOF文件。数据最安全，性能影响最大，性能取决于磁盘</span><br><span class="line">appendfsync everysec #每秒钟同步一次，该策略为AOF的缺省策略。可能是缺少1s的数据</span><br><span class="line">appendfsync no #从不同步，由操作系统决定何时刷新到文件。性能影响最小，数据安全性最差，会丢好几秒数据</span><br></pre></td></tr></table></figure>
 
 <h3 id="优势-1"><a href="#优势-1" class="headerlink" title="优势"></a>优势</h3><ul>
 <li>基于上面不同的策略，可以选择实时性很高的持久化方式，基本上可以保证数据的完整性</li>
@@ -553,7 +553,7 @@ zset   -  压缩链表、跳表
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-06-06 21:17:38
+              2024-08-19 23:29:14
             </span>
             
                   <span class="post-tags">

@@ -150,7 +150,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-09-04 23:40:30
+          2024-09-04 23:57:52
         </span>
         
       </div>
@@ -208,8 +208,101 @@
 <p><strong>trailer：</strong> 所有的数据发送完成之后，发送trailer，表明消息全部发送完成</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HEADERS (flags = END_STREAM, END_HEADERS) ------- 请求头结束表示符 END_HEADERS + EOS</span><br><span class="line">grpc-status = 0                           ------- grpc状态码</span><br><span class="line">grpc-message = xxxxxx                     ------- grpc状态信息</span><br></pre></td></tr></table></figure>
 
-
-
+<p><strong>grpc-status:</strong></p>
+<table>
+<thead>
+<tr>
+<th>错误码</th>
+<th>数字</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OK</td>
+<td>0</td>
+<td>成功状态</td>
+</tr>
+<tr>
+<td>CANCELLED</td>
+<td>1</td>
+<td>操作已被（调用者）取消</td>
+</tr>
+<tr>
+<td>UNKNOWN</td>
+<td>2</td>
+<td>未知错误</td>
+</tr>
+<tr>
+<td>INVALID_ARGUMENT</td>
+<td>3</td>
+<td>客户端指定了非法参数</td>
+</tr>
+<tr>
+<td>DEADLINE_EXCEEDED</td>
+<td>4</td>
+<td>在操作完成前，就已超过了截止时间</td>
+</tr>
+<tr>
+<td>NOT_FOUND</td>
+<td>5</td>
+<td>某些请求实体没有找到</td>
+</tr>
+<tr>
+<td>ALREADY_EXISTS</td>
+<td>6</td>
+<td>客户端试图创建的实体已存在</td>
+</tr>
+<tr>
+<td>PERMISSION_DENIED</td>
+<td>7</td>
+<td>调用者没有权限执行特定的操作</td>
+</tr>
+<tr>
+<td>RESOURCE_EXHAUSTED</td>
+<td>8</td>
+<td>某些资源已被耗尽</td>
+</tr>
+<tr>
+<td>FAILED_PRECONDITION</td>
+<td>9</td>
+<td>操作被拒绝，系统没有处于执行操作所需的状态</td>
+</tr>
+<tr>
+<td>ABORTED</td>
+<td>10</td>
+<td>操作被中止</td>
+</tr>
+<tr>
+<td>OUT_OF_RANGE</td>
+<td>11</td>
+<td>尝试进行的操作超出了合法的范围</td>
+</tr>
+<tr>
+<td>UNIMPLEMENTED</td>
+<td>12</td>
+<td>在该服务中，未实现或不支持（未启用）本操作</td>
+</tr>
+<tr>
+<td>INTERNAL</td>
+<td>13</td>
+<td>内部错误</td>
+</tr>
+<tr>
+<td>UNAVAILABLE</td>
+<td>14</td>
+<td>该服务当前不可用</td>
+</tr>
+<tr>
+<td>DATA_LOSS</td>
+<td>15</td>
+<td>不可恢复的数据丢失或损坏</td>
+</tr>
+<tr>
+<td>UNAUTHENTICATED</td>
+<td>16</td>
+<td>客户端没有进行操作的合法认证凭证</td>
+</tr>
+</tbody></table>
 <h1 id="3、通信模式"><a href="#3、通信模式" class="headerlink" title="3、通信模式"></a>3、通信模式</h1><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.iminho.me/wiki/docs/grpc-cloud-native-go-and-java/grpc-cloud-native-go-and-java-1f07qe06gbf2p">https://www.iminho.me/wiki/docs/grpc-cloud-native-go-and-java/grpc-cloud-native-go-and-java-1f07qe06gbf2p</a></p>
 <h2 id="一元RPC模式"><a href="#一元RPC模式" class="headerlink" title="一元RPC模式"></a>一元RPC模式</h2><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://img.ncfl.tech/202409041235224.jpg" width=600px/>
 
@@ -298,7 +391,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-09-04 23:40:30
+              2024-09-04 23:57:52
             </span>
             
           </div>

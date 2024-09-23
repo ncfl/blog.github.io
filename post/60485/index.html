@@ -150,9 +150,20 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2024-09-06 13:13:09
+          2024-09-11 12:36:39
         </span>
         
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/go/" title="go">
+                    #go
+                  </a>
+                </span>
+                
+              </span>
+          
       </div>
       <div class="markdown-body">
         <h1 id="1、rpcx-VS-grpc"><a href="#1、rpcx-VS-grpc" class="headerlink" title="1、rpcx VS grpc"></a>1、rpcx VS grpc</h1><ul>
@@ -189,8 +200,7 @@
 </ul>
 <h1 id="2、基于HTTP-x2F-2的通信方式"><a href="#2、基于HTTP-x2F-2的通信方式" class="headerlink" title="2、基于HTTP&#x2F;2的通信方式"></a>2、基于HTTP&#x2F;2的通信方式</h1><p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.iminho.me/wiki/docs/grpc-cloud-native-go-and-java/grpc-cloud-native-go-and-java-1f07shps3livl">https://www.iminho.me/wiki/docs/grpc-cloud-native-go-and-java/grpc-cloud-native-go-and-java-1f07shps3livl</a></p>
 <p><strong>grpc是基于http&#x2F;2的协议，不是TCP、UDP层面的协议</strong></p>
-<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://xiaolincoding.com/network/2_http/http_interview.html#http-2-%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%E4%BC%98%E5%8C%96">http&#x2F;2优势</a></p>
-<ul>
+<h2 id="http-x2F-2优势"><a href="#http-x2F-2优势" class="headerlink" title="http&#x2F;2优势"></a><a target="_blank" rel="noopener external nofollow noreferrer" href="https://xiaolincoding.com/network/2_http/http_interview.html#http-2-%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%E4%BC%98%E5%8C%96">http&#x2F;2优势</a></h2><ul>
 <li>头部压缩。http&#x2F;1 只对消息体压缩，消息头不压缩。http&#x2F;2会压缩请求头，同时在客户端和服务器同时维护一张头信息表，基于字段生成一个索引号，如果发现是同一个信息，只发送索引号，增加效率</li>
 <li>HTTP&#x2F;2 不再像 HTTP&#x2F;1.1 里的纯文本形式的报文，而是全面采用了二进制格式，头信息和数据体都是二进制，并且统称为帧（frame）：头信息帧（Headers Frame）和数据帧（Data Frame）</li>
 <li>HTTP&#x2F;1.1 的实现是基于请求-响应模型，一个请求对应一个响应。HTTP&#x2F;2引出了Stream概念，同一个TCP链接中，可以包含1个或多个Message。</li>
@@ -384,11 +394,6 @@
 
 <p>server</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc/metadata&quot;</span></span><br><span class="line">	<span class="string">&quot;io&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;test/rpc/grpc/header_stream_stream/proto/hello&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> server <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s server)</span></span> SayHello(helloServer hello.Greeter_SayHelloServer) <span class="type">error</span> &#123;</span><br><span class="line">	md, _ := metadata.FromIncomingContext(helloServer.Context())</span><br><span class="line">	helloServer.SendHeader(metadata.Join(md, metadata.Pairs(<span class="string">&quot;serverHeaderK&quot;</span>, <span class="string">&quot;serverHeaderV&quot;</span>))) <span class="comment">// 设置rsp的header，只能调用一次</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> name <span class="type">string</span></span><br><span class="line">	<span class="keyword">var</span> count, step <span class="type">int</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		req, err := helloServer.Recv()</span><br><span class="line">		<span class="keyword">if</span> err == io.EOF &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		name += req.GetName() + <span class="string">&quot; &quot;</span></span><br><span class="line">		count++</span><br><span class="line">		<span class="keyword">if</span> count == <span class="number">2</span> &#123;</span><br><span class="line">			md = metadata.Join(md, metadata.Pairs(fmt.Sprintf(<span class="string">&quot;serverK%d&quot;</span>, step), fmt.Sprintf(<span class="string">&quot;serverV%d&quot;</span>, step)))</span><br><span class="line">			log.Printf(<span class="string">&quot;step %d Received: %v&quot;</span>, step, name)</span><br><span class="line">			helloServer.Send(&amp;hello.HelloReply&#123;Message: <span class="string">&quot;Hello &quot;</span> + name&#125;)</span><br><span class="line">			count = <span class="number">0</span></span><br><span class="line">			step++</span><br><span class="line">			name = <span class="string">&quot;&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	helloServer.SetTrailer(metadata.Join(md, metadata.Pairs(fmt.Sprintf(<span class="string">&quot;serverTrailerK%d&quot;</span>, step), fmt.Sprintf(<span class="string">&quot;serverTrailerV%d&quot;</span>, step)))) <span class="comment">// 设置rsp的trailer</span></span><br><span class="line"></span><br><span class="line">	log.Printf(<span class="string">&quot;step %d Received: %v header %+v&quot;</span>, step, name, md)</span><br><span class="line">	<span class="keyword">return</span> helloServer.Send(&amp;hello.HelloReply&#123;Message: <span class="string">&quot;Hello &quot;</span> + name&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Server</span><span class="params">()</span></span> &#123;</span><br><span class="line">	lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:1241&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;failed to listen: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	s := grpc.NewServer()</span><br><span class="line">	hello.RegisterGreeterServer(s, &amp;server&#123;&#125;)</span><br><span class="line">	<span class="keyword">if</span> err = s.Serve(lis); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;failed to serve: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-
-
       </div>
       
         <div class="prev-or-next">
@@ -403,11 +408,27 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2024-09-06 13:13:09
+              2024-09-11 12:36:39
             </span>
             
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/go/" title="go">
+                        #go
+                      </a>
+                    </span>
+                    
+                  </span>
+              
           </div>
           <div class="post-foot-prev">
+            
+              <a href="/post/11843/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
             
           </div>
         </div>
@@ -421,7 +442,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81rpcx-VS-grpc"><span class="toc-text">1、rpcx VS grpc</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2%E3%80%81%E5%9F%BA%E4%BA%8EHTTP-x2F-2%E7%9A%84%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="toc-text">2、基于HTTP&#x2F;2的通信方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E4%BD%93"><span class="toc-text">请求体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E4%BD%93%EF%BC%9A"><span class="toc-text">响应体：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3%E3%80%81%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%BC%8F"><span class="toc-text">3、通信模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">一元RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">服务端流RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">客户端流RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">双向流RPC模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4%E3%80%81interceptor%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">4、interceptor拦截器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">一元拦截器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">流拦截器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5%E3%80%81%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">5、请求头</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">一元请求头</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">流请求头</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81rpcx-VS-grpc"><span class="toc-text">1、rpcx VS grpc</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2%E3%80%81%E5%9F%BA%E4%BA%8EHTTP-x2F-2%E7%9A%84%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="toc-text">2、基于HTTP&#x2F;2的通信方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#http-x2F-2%E4%BC%98%E5%8A%BF"><span class="toc-text">http&#x2F;2优势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E4%BD%93"><span class="toc-text">请求体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E4%BD%93%EF%BC%9A"><span class="toc-text">响应体：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3%E3%80%81%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%BC%8F"><span class="toc-text">3、通信模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">一元RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">服务端流RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">客户端流RPC模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E6%B5%81RPC%E6%A8%A1%E5%BC%8F"><span class="toc-text">双向流RPC模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4%E3%80%81interceptor%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">4、interceptor拦截器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">一元拦截器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-text">流拦截器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5%E3%80%81%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">5、请求头</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%85%83%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">一元请求头</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="toc-text">流请求头</span></a></li></ol></li></ol>
       
     </div>
   </div>

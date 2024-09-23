@@ -1,6 +1,7 @@
-https://blog.ncfl.tech/post/60485/
 https://blog.ncfl.tech/post/60576/
 https://blog.ncfl.tech/post/243/
+https://blog.ncfl.tech/post/11843/
+https://blog.ncfl.tech/post/60485/
 https://blog.ncfl.tech/post/30374/
 https://blog.ncfl.tech/post/2905/
 https://blog.ncfl.tech/post/10891/
@@ -75,7 +76,7 @@ https://blog.ncfl.tech/tags/graphql/
 https://blog.ncfl.tech/tags/mysql/
 https://blog.ncfl.tech/tags/springboot/
 https://blog.ncfl.tech/tags/disconf/
-https://blog.ncfl.tech/tags/git/
+https://blog.ncfl.tech/tags/etcd/
 https://blog.ncfl.tech/tags/linux/
 https://blog.ncfl.tech/tags/gogs/
 https://blog.ncfl.tech/tags/docker/
@@ -90,7 +91,9 @@ https://blog.ncfl.tech/tags/netty/
 https://blog.ncfl.tech/tags/nginx/
 https://blog.ncfl.tech/tags/redis/
 https://blog.ncfl.tech/tags/leetcode/
+https://blog.ncfl.tech/tags/git/
 https://blog.ncfl.tech/categories/go/
+https://blog.ncfl.tech/categories/etcd/
 https://blog.ncfl.tech/categories/kafka/
 https://blog.ncfl.tech/categories/mysql/
 https://blog.ncfl.tech/categories/%E9%9D%A2%E8%AF%95/

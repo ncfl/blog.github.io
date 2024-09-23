@@ -77,6 +77,7 @@ https://blog.ncfl.tech/tags/mysql/
 https://blog.ncfl.tech/tags/springboot/
 https://blog.ncfl.tech/tags/disconf/
 https://blog.ncfl.tech/tags/etcd/
+https://blog.ncfl.tech/tags/git/
 https://blog.ncfl.tech/tags/linux/
 https://blog.ncfl.tech/tags/gogs/
 https://blog.ncfl.tech/tags/docker/
@@ -91,7 +92,6 @@ https://blog.ncfl.tech/tags/netty/
 https://blog.ncfl.tech/tags/nginx/
 https://blog.ncfl.tech/tags/redis/
 https://blog.ncfl.tech/tags/leetcode/
-https://blog.ncfl.tech/tags/git/
 https://blog.ncfl.tech/categories/go/
 https://blog.ncfl.tech/categories/etcd/
 https://blog.ncfl.tech/categories/kafka/

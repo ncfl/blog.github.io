@@ -697,6 +697,13 @@
   </url>
   
   <url>
+    <loc>https://blog.ncfl.tech/tags/git/</loc>
+    <lastmod>2024-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.ncfl.tech/tags/linux/</loc>
     <lastmod>2024-09-23</lastmod>
     <changefreq>weekly</changefreq>
@@ -789,13 +796,6 @@
   
   <url>
     <loc>https://blog.ncfl.tech/tags/leetcode/</loc>
-    <lastmod>2024-09-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.ncfl.tech/tags/git/</loc>
     <lastmod>2024-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
